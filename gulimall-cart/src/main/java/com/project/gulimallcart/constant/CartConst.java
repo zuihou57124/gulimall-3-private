@@ -8,4 +8,6 @@ public class CartConst {
 
     public static int USER_COOKIE_MAX_AGE = 60*60;
 
+    public static String CART_PREFIX = "gulimall:cart:";
+
 }
