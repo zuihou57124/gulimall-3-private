@@ -3,8 +3,11 @@ package com.project.gulimallcart.controller;
 import com.project.gulimallcart.constant.CartConst;
 import com.project.gulimallcart.interceptor.CartInterceptor;
 import com.project.gulimallcart.vo.UserInfoTo;
+import io.swagger.models.auth.In;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 import javax.servlet.http.HttpSession;
 
 @Controller
@@ -21,5 +24,12 @@ public class CartController {
         }
         return "cartList";
     }
+
+    @RequestMapping("/add")
+    public String add(@RequestParam("skuId") Long skuId,@RequestParam("num") Integer num){
+
+        return "success";
+    }
+
 
 }
