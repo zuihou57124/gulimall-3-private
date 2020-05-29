@@ -19,7 +19,17 @@ public class CartItemVo {
 
     private List<String> skuAttr;
 
+    public BigDecimal getPrice() {
+        return price;
+    }
+
+    public void setPrice(BigDecimal price) {
+        this.price = price;
+    }
+
     private BigDecimal price;
+
+
 
 
     public Long getSkuId() {

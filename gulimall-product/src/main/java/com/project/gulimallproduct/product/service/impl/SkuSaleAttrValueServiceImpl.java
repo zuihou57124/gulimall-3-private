@@ -126,4 +126,11 @@ public class SkuSaleAttrValueServiceImpl extends ServiceImpl<SkuSaleAttrValueDao
         })).collect(Collectors.toList());*/
 
     }
+
+    @Override
+    public List<String> getSaleAttrsBySkuId(Long skuId) {
+
+        List<SkuSaleAttrValueEntity> list = this.list(new QueryWrapper<SkuSaleAttrValueEntity>().eq("sku_id", skuId));
+        return list.stream().map((item)-> item.getAttrName()+":"+item.getAttrValue()+",").collect(Collectors.toList());
+    }
 }

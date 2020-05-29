@@ -15,6 +15,10 @@ import org.springframework.data.redis.core.BoundSetOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ThreadPoolExecutor;
+
 @Service
 public class CartServiceImpl implements CartService {
 
@@ -24,18 +28,44 @@ public class CartServiceImpl implements CartService {
     @Autowired
     ProductFeignService productFeignService;
 
+    @Autowired
+    ThreadPoolExecutor executor;
+
     @Override
     public CartItemVo add(Long skuId, Integer num) {
         BoundHashOperations<String, Object, Object> cartRedisOps = getCartRedisOps();
-        R r = productFeignService.info(skuId);
-        if(r.getCode()==0){
-            SkuInfoTo skuInfo = r.getData("skuInfo", new TypeReference<SkuInfoTo>() {});
-            cartRedisOps.put(skuInfo.getSkuId(),skuInfo);
-        }else {
-            System.out.println("远程调用商品服务失败");
-        }
 
-        return null;
+        CartItemVo cartItemVo = new CartItemVo();
+        CompletableFuture<Void> skuInfoTask = CompletableFuture.runAsync(() -> {
+            R r = productFeignService.info(skuId);
+            if(r.getCode()==0){
+                SkuInfoTo skuInfo = r.getData("skuInfo", new TypeReference<SkuInfoTo>(){});
+                //封装商品项信息
+                cartItemVo.setChecked(false);
+                cartItemVo.setCount(num);
+                cartItemVo.setSkuId(skuId);
+                cartItemVo.setImg(skuInfo.getSkuDefaultImg());
+                cartItemVo.setTitle(skuInfo.getSkuTitle());
+                cartItemVo.setPrice(skuInfo.getPrice());
+                //把商品信息保存在redis中
+                //cartRedisOps.put(skuInfo.getSkuId(),skuInfo);
+            }else {
+                System.out.println("远程调用商品服务获商品信息失败");
+            }
+        });
+        CompletableFuture.runAsync(()->{
+            R r = productFeignService.list(skuId);
+            if(r.getCode()==0){
+                List<String> saleAttrsList = r.getData("saleAttrsList", new TypeReference<List<String>>() {});
+                //商品的属性信息需要远程调用商品服务
+                cartItemVo.setSkuAttr(saleAttrsList);
+            }
+            else {
+                System.out.println("远程调用商品服务获取sku销售信息失败");
+            }
+        });
+
+        return cartItemVo;
     }
 
     /**
