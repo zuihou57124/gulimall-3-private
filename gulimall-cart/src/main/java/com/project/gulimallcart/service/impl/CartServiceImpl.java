@@ -50,8 +50,9 @@ public class CartServiceImpl implements CartService {
         //R r2 = productFeignService.list(skuId);
 
         //首先判断购物车是否已经包含该商品，如果有，只增加数量，没有则添加
-        String jsonString = (String) cartRedisOps.get(skuId.toString());
-        if(jsonString!=null){
+        Object object = cartRedisOps.get(skuId.toString());
+        if(object!=null){
+            String jsonString = (String) object;
             CartItemVo cartItemVo = JSONObject.parseObject(jsonString,CartItemVo.class);
             cartItemVo.setCount(cartItemVo.getCount()+num);
             cartRedisOps.put(skuId.toString(),JSONObject.toJSONString(cartItemVo));
