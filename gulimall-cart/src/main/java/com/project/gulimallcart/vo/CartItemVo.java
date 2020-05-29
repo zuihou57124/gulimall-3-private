@@ -1,9 +1,10 @@
 package com.project.gulimallcart.vo;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.List;
 
-public class CartItemVo {
+public class CartItemVo implements Serializable {
 
     private Long skuId;
 
@@ -15,7 +16,7 @@ public class CartItemVo {
 
     private Boolean checked;
 
-    private BigDecimal total;
+    private BigDecimal total = new BigDecimal(0);
 
     private List<String> skuAttr;
 

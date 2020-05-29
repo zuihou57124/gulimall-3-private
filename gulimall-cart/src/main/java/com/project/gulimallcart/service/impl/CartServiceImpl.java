@@ -1,5 +1,6 @@
 package com.project.gulimallcart.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.project.gulimallcart.constant.CartConst;
 import com.project.gulimallcart.feign.ProductFeignService;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 
 @Service
@@ -32,8 +34,11 @@ public class CartServiceImpl implements CartService {
     ThreadPoolExecutor executor;
 
     @Override
-    public CartItemVo add(Long skuId, Integer num) {
+    public CartItemVo add(Long skuId, Integer num) throws ExecutionException, InterruptedException {
         BoundHashOperations<String, Object, Object> cartRedisOps = getCartRedisOps();
+
+        //R r1 = productFeignService.info(skuId);
+        //R r2 = productFeignService.list(skuId);
 
         CartItemVo cartItemVo = new CartItemVo();
         CompletableFuture<Void> skuInfoTask = CompletableFuture.runAsync(() -> {
@@ -47,23 +52,26 @@ public class CartServiceImpl implements CartService {
                 cartItemVo.setImg(skuInfo.getSkuDefaultImg());
                 cartItemVo.setTitle(skuInfo.getSkuTitle());
                 cartItemVo.setPrice(skuInfo.getPrice());
-                //把商品信息保存在redis中
-                //cartRedisOps.put(skuInfo.getSkuId(),skuInfo);
+
             }else {
                 System.out.println("远程调用商品服务获商品信息失败");
             }
-        });
-        CompletableFuture.runAsync(()->{
+        },executor);
+        CompletableFuture<Void> skuSaleAttrsTask = CompletableFuture.runAsync(() -> {
             R r = productFeignService.list(skuId);
-            if(r.getCode()==0){
-                List<String> saleAttrsList = r.getData("saleAttrsList", new TypeReference<List<String>>() {});
+            if (r.getCode() == 0) {
+                List<String> saleAttrsList = r.getData("saleAttrList", new TypeReference<List<String>>() {});
                 //商品的属性信息需要远程调用商品服务
                 cartItemVo.setSkuAttr(saleAttrsList);
-            }
-            else {
+            } else {
                 System.out.println("远程调用商品服务获取sku销售信息失败");
             }
-        });
+        },executor);
+
+        CompletableFuture.allOf(skuInfoTask,skuSaleAttrsTask).get();
+        //把商品信息保存在redis中
+        String json = JSONObject.toJSONString(cartItemVo);
+        cartRedisOps.put(skuId.toString(),json);
 
         return cartItemVo;
     }

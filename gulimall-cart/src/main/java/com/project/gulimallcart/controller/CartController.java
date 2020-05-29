@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpSession;
 import javax.xml.ws.Action;
+import java.util.concurrent.ExecutionException;
 
 @Controller
 public class CartController {
@@ -35,7 +36,7 @@ public class CartController {
 
     @RequestMapping("/add")
     public String add(@RequestParam("skuId") Long skuId,@RequestParam("num") Integer num,
-                    Model model){
+                    Model model) throws ExecutionException, InterruptedException {
         CartItemVo cartItemVo = cartService.add(skuId,num);
         model.addAttribute("item",cartItemVo);
         return "success";
