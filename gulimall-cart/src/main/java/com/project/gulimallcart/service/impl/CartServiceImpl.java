@@ -34,12 +34,30 @@ public class CartServiceImpl implements CartService {
     @Autowired
     ThreadPoolExecutor executor;
 
+    /**
+     * 添加商品到购物车(基于redis)
+     * @param skuId
+     * @param num
+     * @return 商品项
+     * @throws ExecutionException
+     * @throws InterruptedException
+     */
     @Override
     public CartItemVo add(Long skuId, Integer num) throws ExecutionException, InterruptedException {
         BoundHashOperations<String, Object, Object> cartRedisOps = getCartRedisOps();
 
         //R r1 = productFeignService.info(skuId);
         //R r2 = productFeignService.list(skuId);
+
+        //首先判断购物车是否已经包含该商品，如果有，只增加数量，没有则添加
+        Object object = cartRedisOps.get(skuId.toString());
+        if(object!=null){
+            String jsonString = JSONObject.toJSONString(object);
+            CartItemVo cartItemVo = JSONObject.parseObject(jsonString,CartItemVo.class);
+            cartItemVo.setCount(cartItemVo.getCount()+1);
+            cartRedisOps.put(skuId.toString(),cartItemVo);
+            return cartItemVo;
+        }
 
         CartItemVo cartItemVo = new CartItemVo();
         CompletableFuture<Void> skuInfoTask = CompletableFuture.runAsync(() -> {
