@@ -9,4 +9,10 @@ public class UserInfoTo {
 
     private String userKey;
 
+
+    /**
+     * 提示浏览器是否需要创建新的cookie，默认需要创建
+     */
+    private Boolean isTemp = true;
+
 }
