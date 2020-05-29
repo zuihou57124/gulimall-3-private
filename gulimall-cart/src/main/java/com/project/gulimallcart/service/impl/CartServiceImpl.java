@@ -52,10 +52,10 @@ public class CartServiceImpl implements CartService {
         //首先判断购物车是否已经包含该商品，如果有，只增加数量，没有则添加
         Object object = cartRedisOps.get(skuId.toString());
         if(object!=null){
-            String jsonString = JSONObject.toJSONString(object);
+            String jsonString = (String) object;
             CartItemVo cartItemVo = JSONObject.parseObject(jsonString,CartItemVo.class);
-            cartItemVo.setCount(cartItemVo.getCount()+1);
-            cartRedisOps.put(skuId.toString(),cartItemVo);
+            cartItemVo.setCount(cartItemVo.getCount()+num);
+            cartRedisOps.put(skuId.toString(),JSONObject.toJSONString(cartItemVo));
             return cartItemVo;
         }
 
