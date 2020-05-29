@@ -1,10 +1,10 @@
 package com.project.gulimallcart.vo;
 
-import java.io.Serializable;
+
 import java.math.BigDecimal;
 import java.util.List;
 
-public class CartItemVo implements Serializable {
+public class CartItemVo{
 
     private Long skuId;
 

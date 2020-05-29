@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.BoundSetOperations;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,7 +26,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 public class CartServiceImpl implements CartService {
 
     @Autowired
-    RedisTemplate redisTemplate;
+    StringRedisTemplate redisTemplate;
 
     @Autowired
     ProductFeignService productFeignService;
@@ -72,7 +73,7 @@ public class CartServiceImpl implements CartService {
         //把商品信息保存在redis中
         String json = JSONObject.toJSONString(cartItemVo);
         cartRedisOps.put(skuId.toString(),json);
-
+        //redisTemplate.opsForHash().put("cart:id-1","1",json);
         return cartItemVo;
     }
 
