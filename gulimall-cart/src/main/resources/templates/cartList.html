@@ -91,7 +91,7 @@
 
 							<div>
 								<ol>
-									<li><input type="checkbox" class="check" th:value="${cartInfo.getSkuId()}" onchange="checkSku(this)" th:checked="(${cartInfo.getChecked()})" /></li>
+									<li><input type="checkbox" th:attr="skuId=${cartInfo.getSkuId()}" class="item_check" th:value="${cartInfo.getSkuId()}" onchange="checkSku(this)" th:checked="(${cartInfo.getChecked()})" /></li>
 									<li>
 										<dt><img th:src="${cartInfo.getImg()}" src="img\shop1.jpg" alt=""></dt>
 										<dd th:onclick="'toItem('+${cartInfo.skuId}+')'">
@@ -182,8 +182,8 @@
 					</div>
 					<div>
 						<ol>
-							<li>总价:<span style="color:#e64346;font-weight:bold;font-size:16px;" class="fnt">￥0.00</span> </li>
-
+							<li>总价:<span th:text="${cart.getTotal()}" style="color:#e64346;font-weight:bold;font-size:16px;" class="fnt">￥0.00</span> </li>
+							<li>优惠:<span th:text="${cart.reduce}" style="color:#e64346;font-weight:bold;font-size:16px;" class="fnt">￥0.00</span> </li>
 						</ol>
 					</div>
 					<div><button onclick="toTrade()" type="button">去结算</button></div>
@@ -806,5 +806,17 @@
 		}).mouseout(function() {
 			$(this).children("p").children("img").attr("src", "img/one_mian_gwc1.png")
 		})
+
+		$(".item_check").click(function () {
+			let skuId = $(this).attr('skuId');
+			let checked = $(this).prop('checked');
+			location.href = "http://cart.gulimall.com/checkCartItem?skuId="+skuId+"&checked="+checked;
+		})
+
+		$(".allCheck").click(function () {
+			$(this)
+			location.href = "http://cart.gulimall.com/checkAllCartItem?checked"=1;
+		})
+
 	</script>
 </html>

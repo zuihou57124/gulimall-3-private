@@ -88,6 +88,36 @@ public class CartServiceImpl implements CartService {
 
     }
 
+    /**
+     * @param skuId
+     * @param checked
+     * 全选购物车
+     */
+    @Override
+    public void checkCartItem(Long skuId, Boolean checked) {
+
+        BoundHashOperations<String, Object, Object> cartRedisOps = getCartRedisOps();
+        if(skuId==null){
+            List<Object> allCartItems = cartRedisOps.values();
+            //List<String> allCartItemsJsonString = new ArrayList<>();
+            if(allCartItems!=null){
+                allCartItems.forEach((item)->{
+                    String json = (String) item;
+                    CartItemVo cartItem = JSONObject.parseObject(json,CartItemVo.class);
+                    cartItem.setChecked(checked);
+                    json = JSONObject.toJSONString(cartItem);
+                    cartRedisOps.put(cartItem.getSkuId().toString(),json);
+                    //allCartItemsJsonString.add(json);
+                });
+            }
+        }
+        CartItemVo cartItem = getCartItem(skuId);
+        cartItem.setChecked(checked);
+
+        cartRedisOps.put(skuId.toString(),JSONObject.toJSONString(cartItem));
+
+    }
+
     private List<CartItemVo> getCartItemFromRedis(BoundHashOperations<String,Object,Object> cartRedisOps) {
         List<Object> values = cartRedisOps.values();
         List<CartItemVo> cartItemList= null;

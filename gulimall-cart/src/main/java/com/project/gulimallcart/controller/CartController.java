@@ -13,6 +13,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpSession;
 import javax.xml.ws.Action;
 import java.util.List;
@@ -46,6 +47,30 @@ public class CartController {
         CartItemVo cartItemVo = cartService.add(skuId,num);
         //model.addAttribute("skuId",cartItemVo.getSkuId());
         return "redirect:http://cart.gulimall.com/success.html"+"?skuId="+skuId.toString();
+    }
+
+    /**
+     * @param checked
+     * @param skuId
+     * @return
+     * 改变商品选项状态（是否选中）
+     */
+    @RequestMapping("/checkCartItem")
+    public String checkCartItem(@RequestParam("checked") Boolean checked,
+                                @RequestParam("skuId") Long skuId){
+        cartService.checkCartItem(skuId,checked);
+
+        return "redirect:http://cart.gulimall.com/cart.html";
+    }
+
+    /**
+     * 全选购物项
+     */
+    @RequestMapping("/checkCartItem")
+    public String checkAllCartItem(@RequestParam("checked") Boolean checked){
+        cartService.checkCartItem(null,checked);
+
+        return "redirect:http://cart.gulimall.com/cart.html";
     }
 
     @RequestMapping("/success.html")
