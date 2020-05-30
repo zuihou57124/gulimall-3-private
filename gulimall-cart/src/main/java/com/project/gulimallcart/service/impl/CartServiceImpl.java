@@ -91,7 +91,6 @@ public class CartServiceImpl implements CartService {
     /**
      * @param skuId
      * @param checked
-     * 全选购物车
      */
     @Override
     public void checkCartItem(Long skuId, Boolean checked) {
@@ -111,10 +110,12 @@ public class CartServiceImpl implements CartService {
                 });
             }
         }
-        CartItemVo cartItem = getCartItem(skuId);
-        cartItem.setChecked(checked);
+        else {
+            CartItemVo cartItem = getCartItem(skuId);
+            cartItem.setChecked(checked);
 
-        cartRedisOps.put(skuId.toString(),JSONObject.toJSONString(cartItem));
+            cartRedisOps.put(skuId.toString(),JSONObject.toJSONString(cartItem));
+        }
 
     }
 
