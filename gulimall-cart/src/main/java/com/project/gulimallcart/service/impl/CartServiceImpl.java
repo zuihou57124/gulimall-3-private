@@ -44,20 +44,57 @@ public class CartServiceImpl implements CartService {
     @Override
     public Cart getAllCartItem(UserInfoTo userInfoTo) {
 
+        //如果已登录，要合并游客购物车
         BoundHashOperations<String, Object, Object> cartRedisOps = getCartRedisOps();
         Cart cart = new Cart();
-        List<CartItemVo> cartItemList = null;
+        List<CartItemVo> cartItemListForUser = null;
+        List<CartItemVo> cartItemListForTemp = null;
+        if(userInfoTo.getUserId()==null){
+            List<Object> values = cartRedisOps.values();
+            cartItemListForUser = getCartItemFromRedis(cartRedisOps);
+            cart.setItems(cartItemListForUser);
+        }
+        else {
+            //已登录
+            List<Object> values = cartRedisOps.values();
+            if(values!=null && values.size()>0){
+                cartItemListForUser = values.stream().map((item) -> {
+                    String json = (String) item;
+                    CartItemVo cartItemVo = JSONObject.parseObject(json, CartItemVo.class);
+                    return cartItemVo;
+                }).collect(Collectors.toList());
+                //cart.setItems(cartItemListForUser);
+            }
+
+            cartRedisOps = redisTemplate.boundHashOps(CartConst.CART_PREFIX+userInfoTo.getUserKey());
+            values = cartRedisOps.values();
+            if(values!=null && values.size()>0){
+                cartItemListForTemp = values.stream().map((item) -> {
+                    String json = (String) item;
+                    CartItemVo cartItemVo = JSONObject.parseObject(json, CartItemVo.class);
+                    return cartItemVo;
+                }).collect(Collectors.toList());
+
+                cartItemListForUser.addAll(cartItemListForTemp);
+                cart.setItems(cartItemListForUser);
+            }
+
+        }
+
+        return cart;
+    }
+
+    private List<CartItemVo> getCartItemFromRedis(BoundHashOperations<String,Object,Object> cartRedisOps) {
         List<Object> values = cartRedisOps.values();
+        List<CartItemVo> cartItemList= null;
         if(values!=null && values.size()>0){
             cartItemList = values.stream().map((item) -> {
                 String json = (String) item;
                 CartItemVo cartItemVo = JSONObject.parseObject(json, CartItemVo.class);
                 return cartItemVo;
             }).collect(Collectors.toList());
-            cart.setItems(cartItemList);
         }
-
-        return cart;
+        return cartItemList;
     }
 
     /**
