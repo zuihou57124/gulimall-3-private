@@ -96,7 +96,10 @@
 										<dt><img th:src="${cartInfo.getImg()}" src="img\shop1.jpg" alt=""></dt>
 										<dd th:onclick="'toItem('+${cartInfo.skuId}+')'">
 											<p>
-												<span th:text="${cartInfo.title}">TCL 55A950C 55英寸32核</span>
+												<span style="font-size: 15px" th:text="${cartInfo.title}">TCL 55A950C 55英寸32核</span>
+												<br>
+												<br>
+												<span th:each="attr : ${cartInfo.skuAttr}">[[${attr}]]</span>
 											</p>
 										</dd>
 									</li>
