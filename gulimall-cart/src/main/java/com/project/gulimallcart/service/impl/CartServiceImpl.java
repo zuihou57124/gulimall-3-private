@@ -6,6 +6,7 @@ import com.project.gulimallcart.constant.CartConst;
 import com.project.gulimallcart.feign.ProductFeignService;
 import com.project.gulimallcart.interceptor.CartInterceptor;
 import com.project.gulimallcart.service.CartService;
+import com.project.gulimallcart.vo.Cart;
 import com.project.gulimallcart.vo.CartItemVo;
 import com.project.gulimallcart.vo.SkuInfoTo;
 import com.project.gulimallcart.vo.UserInfoTo;
@@ -21,6 +22,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.stream.Collectors;
 
 @Service
 public class CartServiceImpl implements CartService {
@@ -33,6 +35,30 @@ public class CartServiceImpl implements CartService {
 
     @Autowired
     ThreadPoolExecutor executor;
+
+    /**
+     * 获取用户的购物车信息
+     * @param userInfoTo
+     * @return cartItemList
+     */
+    @Override
+    public Cart getAllCartItem(UserInfoTo userInfoTo) {
+
+        BoundHashOperations<String, Object, Object> cartRedisOps = getCartRedisOps();
+        Cart cart = new Cart();
+        List<CartItemVo> cartItemList = null;
+        List<Object> values = cartRedisOps.values();
+        if(values!=null && values.size()>0){
+            cartItemList = values.stream().map((item) -> {
+                String json = (String) item;
+                CartItemVo cartItemVo = JSONObject.parseObject(json, CartItemVo.class);
+                return cartItemVo;
+            }).collect(Collectors.toList());
+            cart.setItems(cartItemList);
+        }
+
+        return cart;
+    }
 
     /**
      * 获取购物项信息

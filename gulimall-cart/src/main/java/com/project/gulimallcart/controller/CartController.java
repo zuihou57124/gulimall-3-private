@@ -3,6 +3,7 @@ package com.project.gulimallcart.controller;
 import com.project.gulimallcart.constant.CartConst;
 import com.project.gulimallcart.interceptor.CartInterceptor;
 import com.project.gulimallcart.service.CartService;
+import com.project.gulimallcart.vo.Cart;
 import com.project.gulimallcart.vo.CartItemVo;
 import com.project.gulimallcart.vo.UserInfoTo;
 import io.swagger.models.auth.In;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpSession;
 import javax.xml.ws.Action;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 @Controller
@@ -23,7 +25,7 @@ public class CartController {
     CartService cartService;
 
     @RequestMapping("/cart.html")
-    public String cartList(HttpSession session){
+    public String cartList(HttpSession session,Model model){
 
         UserInfoTo userInfoTo = CartInterceptor.threadLocal.get();
 
@@ -31,6 +33,10 @@ public class CartController {
         if (user != null) {
             //return "";
         }
+
+        Cart cart = cartService.getAllCartItem(userInfoTo);
+        model.addAttribute("cart",cart);
+
         return "cartList";
     }
 
