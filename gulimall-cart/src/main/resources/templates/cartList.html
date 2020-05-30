@@ -13,23 +13,23 @@
 	<body>
 		<header>
 			<a name="mao1">
-				<div class="header">
+				<div class="header" style="height: 40px;font-size: 17px">
 
 					<ul class="header-left">
 						<li>
 
-							<a href="">首页</a>
+							<a href="http://gulimall.com" style="font-size: 17px">首页</a>
 						</li>
 
 					</ul>
 					<ul class="header-right">
 						<li>
-							<a href="http://auth.gulimall.com/login.html" th:if="${session.user!=null}">欢迎 : [[${session.user.nickname}]]</a>
-							<a href="http://auth.gulimall.com/login.html" th:if="${session.user==null}">请登录</a>
+							<a style="font-size: 17px" href="http://auth.gulimall.com/login.html" th:if="${session.user!=null}">欢迎 : [[${session.user.nickname}]]</a>
+							<a style="font-size: 17px" href="http://auth.gulimall.com/login.html" th:if="${session.user==null}">请登录</a>
 						</li>
-						<li><a href="http://auth.gulimall.com/register.html">免费注册</a></li>
+						<li><a style="font-size: 17px" href="http://auth.gulimall.com/register.html">免费注册</a></li>
 						<li class="spacer"></li>
-						<li><a href="">我的订单</a></li>
+						<li><a style="font-size: 17px" href="">我的订单</a></li>
 						<li class="spacer"></li>
 
 					</ul>
@@ -84,13 +84,14 @@
 				</div>
 
 				<div class="One_ShopCon">
-					<ul>
+					<h2 th:if="${cart.getItems()==null}"><a href="http://gulimall.com">购物车为空，去购物</a></h2>
+					<ul th:if="${cart.getItems()!=null}">
 						<li th:each="cartInfo:${cart.getItems()}">
 							<div> </div>
 
 							<div>
 								<ol>
-									<li><input type="checkbox" class="check" th:value="${cartInfo.getSkuId()}" onchange="checkSku(this)" th:checked="(${cartInfo.getChecked()}==1)?'true':'false'" /></li>
+									<li><input type="checkbox" class="check" th:value="${cartInfo.getSkuId()}" onchange="checkSku(this)" th:checked="(${cartInfo.getChecked()})" /></li>
 									<li>
 										<dt><img th:src="${cartInfo.getImg()}" src="img\shop1.jpg" alt=""></dt>
 										<dd th:onclick="'toItem('+${cartInfo.skuId}+')'">
