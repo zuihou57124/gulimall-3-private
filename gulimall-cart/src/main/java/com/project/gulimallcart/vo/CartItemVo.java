@@ -75,7 +75,7 @@ public class CartItemVo{
 
     public BigDecimal getTotal() {
 
-        return this.total.multiply(new BigDecimal(count));
+        return this.price.multiply(new BigDecimal(count));
     }
 
     public void setTotal(BigDecimal total) {
