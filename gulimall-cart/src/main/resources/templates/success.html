@@ -65,7 +65,7 @@
         <div class="success-wrap">
         <div class="w" id="result">
         <div class="m succeed-box">
-        <div class="mc success-cont">
+        <div class="mc success-cont" th:if="${item!=null}">
         <div class="success-lcol">
         <div class="success-top"><b class="succ-icon"></b>
         <h3 class="ftx-02">商品已成功加入购物车</h3></div>
@@ -93,6 +93,7 @@
    </div>
     </div>
     </div>
+        <div class="mc success-cont" th:if="${item==null}">购物车无商品</div>
     </div>
     </div>
     </div>
