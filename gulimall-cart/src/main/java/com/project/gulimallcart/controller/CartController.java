@@ -25,7 +25,7 @@ public class CartController {
     CartService cartService;
 
     @RequestMapping("/cart.html")
-    public String cartList(HttpSession session,Model model){
+    public String cartList(HttpSession session,Model model) throws ExecutionException, InterruptedException {
 
         UserInfoTo userInfoTo = CartInterceptor.threadLocal.get();
 

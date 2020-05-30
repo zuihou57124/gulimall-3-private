@@ -13,5 +13,7 @@ public interface CartService {
 
     CartItemVo getCartItem(Long skuId);
 
-    Cart getAllCartItem(UserInfoTo userInfoTo);
+    Cart getAllCartItem(UserInfoTo userInfoTo) throws ExecutionException, InterruptedException;
+
+    void clearCart(String cartKey);
 }

@@ -6,7 +6,7 @@ public class CartConst {
 
     public static String TEMP_USER_COOKIE_NAME = "user-key";
 
-    public static int USER_COOKIE_MAX_AGE = 60*60*2;
+    public static int USER_COOKIE_MAX_AGE = 60*60*24;
 
     public static String CART_PREFIX = "gulimall:cart:";
 

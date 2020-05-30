@@ -45,67 +45,47 @@ public class CartServiceImpl implements CartService {
      * @return cartItemList
      */
     @Override
-    public Cart getAllCartItem(UserInfoTo userInfoTo) {
+    public Cart getAllCartItem(UserInfoTo userInfoTo) throws ExecutionException, InterruptedException {
 
         //如果已登录，要合并游客购物车
-        BoundHashOperations<String, Object, Object> cartRedisOps = getCartRedisOps();
+        BoundHashOperations<String, Object, Object> cartRedisOpsForTemp = redisTemplate.boundHashOps(CartConst.CART_PREFIX+userInfoTo.getUserKey());
+        BoundHashOperations<String, Object, Object> cartRedisOpsForUser = redisTemplate.boundHashOps(CartConst.CART_PREFIX+userInfoTo.getUserId());
         Cart cart = new Cart();
         List<CartItemVo> cartItemListForUser = null;
         List<CartItemVo> cartItemListForTemp = null;
         if(userInfoTo.getUserId()==null){
-            List<Object> values = cartRedisOps.values();
-            cartItemListForUser = getCartItemFromRedis(cartRedisOps);
+            List<Object> values = cartRedisOpsForTemp.values();
+            cartItemListForUser = getCartItemFromRedis(cartRedisOpsForTemp);
             cart.setItems(cartItemListForUser);
         }
         else {
             //已登录,合并购物车
-            cartItemListForUser = getCartItemFromRedis(cartRedisOps);
-            cartRedisOps = redisTemplate.boundHashOps(CartConst.CART_PREFIX+userInfoTo.getUserKey());
-            cartItemListForTemp = getCartItemFromRedis(cartRedisOps);
-            //商品如果存在，只增加数量
-            List<Long> userCartSkuIds =  cartItemListForUser.stream().map(CartItemVo::getSkuId).collect(Collectors.toList());
-            List<Long> tempCartSkuIds =  cartItemListForTemp.stream().map(CartItemVo::getSkuId).collect(Collectors.toList());
+            cartItemListForUser = getCartItemFromRedis(cartRedisOpsForUser);
+            cartItemListForTemp = getCartItemFromRedis(cartRedisOpsForTemp);
 
-            List<CartItemVo> finalCartItemList = new ArrayList<>();
-            finalCartItemList.addAll(cartItemListForUser);
-
-            for (CartItemVo c1 : cartItemListForTemp) {
-
-                if(userCartSkuIds.contains(c1.getSkuId())){
-                    for (CartItemVo cartItemUser : cartItemListForUser) {
-                        if(cartItemUser.getSkuId().equals(c1.getSkuId())){
-                            c1.setCount(c1.getCount()+cartItemUser.getCount());
-                            for (int i = 0; i < finalCartItemList.size(); i++) {
-                                CartItemVo cartItemVo = finalCartItemList.get(i);
-                                if(cartItemVo.getSkuId().equals(c1.getSkuId())){
-                                    finalCartItemList.set(i,c1);
-                                    break;
-                                }
-                            }
-                        }
-                    }
+            if(cartItemListForTemp.size() > 0){
+                for (CartItemVo cartItemVo : cartItemListForTemp) {
+                    add(cartItemVo.getSkuId(),cartItemVo.getCount());
                 }
-                else {
-                    finalCartItemList.add(c1);
-                }
-
-
-//                for (CartItemVo c2 : cartItemListForTemp) {
-//                    if(c1.getSkuId().equals(c2.getSkuId())){
-//                        c1.setCount(c1.getCount()+c2.getCount());
-//                        finalCartItemList.add(c1);
-//                    }
-//                }
             }
-
-            //cartItemListForUser.addAll(cartItemListForTemp);
-            //cartItemListForUser.addAll(finalCartItemList);
+            cartItemListForUser = getCartItemFromRedis(cartRedisOpsForUser);
             //合并后，删除临时购物车
-            redisTemplate.delete(cartRedisOps.getKey());
-            cart.setItems(finalCartItemList);
+            clearCart(cartRedisOpsForTemp.getKey());
+            cart.setItems(cartItemListForUser);
         }
 
         return cart;
+    }
+
+    /**
+     * @param cartKey
+     * 清空购物车
+     */
+    @Override
+    public void clearCart(String cartKey) {
+
+        redisTemplate.delete(cartKey);
+
     }
 
     private List<CartItemVo> getCartItemFromRedis(BoundHashOperations<String,Object,Object> cartRedisOps) {
