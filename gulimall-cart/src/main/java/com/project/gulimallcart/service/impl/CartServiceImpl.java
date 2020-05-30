@@ -35,6 +35,18 @@ public class CartServiceImpl implements CartService {
     ThreadPoolExecutor executor;
 
     /**
+     * 获取购物项信息
+     * @param skuId
+     * @return cartItem
+     */
+    @Override
+    public CartItemVo getCartItem(Long skuId) {
+        BoundHashOperations<String, Object, Object> cartRedisOps = getCartRedisOps();
+        String json = (String) cartRedisOps.get(skuId.toString());
+        return JSONObject.parseObject(json, CartItemVo.class);
+    }
+
+    /**
      * 添加商品到购物车(基于redis)
      * @param skuId
      * @param num

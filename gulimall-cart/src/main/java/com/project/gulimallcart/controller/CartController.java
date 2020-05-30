@@ -38,9 +38,17 @@ public class CartController {
     public String add(@RequestParam("skuId") Long skuId,@RequestParam("num") Integer num,
                     Model model) throws ExecutionException, InterruptedException {
         CartItemVo cartItemVo = cartService.add(skuId,num);
-        model.addAttribute("item",cartItemVo);
+        //model.addAttribute("skuId",cartItemVo.getSkuId());
+        return "redirect:http://cart.gulimall.com/success.html"+"?skuId="+skuId.toString();
+    }
+
+    @RequestMapping("/success.html")
+    public String successPage(@RequestParam("skuId") Long skuId,Model model){
+        CartItemVo cartItem = cartService.getCartItem(skuId);
+        model.addAttribute("item",cartItem);
         return "success";
     }
+
 
 
 }

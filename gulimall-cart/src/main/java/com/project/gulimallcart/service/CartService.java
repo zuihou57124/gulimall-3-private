@@ -8,4 +8,5 @@ public interface CartService {
 
     CartItemVo add(Long skuId, Integer num) throws ExecutionException, InterruptedException;
 
+    CartItemVo getCartItem(Long skuId);
 }
