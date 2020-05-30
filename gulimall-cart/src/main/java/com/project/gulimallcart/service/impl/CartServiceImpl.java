@@ -18,10 +18,13 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -55,30 +58,51 @@ public class CartServiceImpl implements CartService {
             cart.setItems(cartItemListForUser);
         }
         else {
-            //已登录
-            List<Object> values = cartRedisOps.values();
-            if(values!=null && values.size()>0){
-                cartItemListForUser = values.stream().map((item) -> {
-                    String json = (String) item;
-                    CartItemVo cartItemVo = JSONObject.parseObject(json, CartItemVo.class);
-                    return cartItemVo;
-                }).collect(Collectors.toList());
-                //cart.setItems(cartItemListForUser);
-            }
-
+            //已登录,合并购物车
+            cartItemListForUser = getCartItemFromRedis(cartRedisOps);
             cartRedisOps = redisTemplate.boundHashOps(CartConst.CART_PREFIX+userInfoTo.getUserKey());
-            values = cartRedisOps.values();
-            if(values!=null && values.size()>0){
-                cartItemListForTemp = values.stream().map((item) -> {
-                    String json = (String) item;
-                    CartItemVo cartItemVo = JSONObject.parseObject(json, CartItemVo.class);
-                    return cartItemVo;
-                }).collect(Collectors.toList());
+            cartItemListForTemp = getCartItemFromRedis(cartRedisOps);
+            //商品如果存在，只增加数量
+            List<Long> userCartSkuIds =  cartItemListForUser.stream().map(CartItemVo::getSkuId).collect(Collectors.toList());
+            List<Long> tempCartSkuIds =  cartItemListForTemp.stream().map(CartItemVo::getSkuId).collect(Collectors.toList());
 
-                cartItemListForUser.addAll(cartItemListForTemp);
-                cart.setItems(cartItemListForUser);
+            List<CartItemVo> finalCartItemList = new ArrayList<>();
+            finalCartItemList.addAll(cartItemListForUser);
+
+            for (CartItemVo c1 : cartItemListForTemp) {
+
+                if(userCartSkuIds.contains(c1.getSkuId())){
+                    for (CartItemVo cartItemUser : cartItemListForUser) {
+                        if(cartItemUser.getSkuId().equals(c1.getSkuId())){
+                            c1.setCount(c1.getCount()+cartItemUser.getCount());
+                            for (int i = 0; i < finalCartItemList.size(); i++) {
+                                CartItemVo cartItemVo = finalCartItemList.get(i);
+                                if(cartItemVo.getSkuId().equals(c1.getSkuId())){
+                                    finalCartItemList.set(i,c1);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                else {
+                    finalCartItemList.add(c1);
+                }
+
+
+//                for (CartItemVo c2 : cartItemListForTemp) {
+//                    if(c1.getSkuId().equals(c2.getSkuId())){
+//                        c1.setCount(c1.getCount()+c2.getCount());
+//                        finalCartItemList.add(c1);
+//                    }
+//                }
             }
 
+            //cartItemListForUser.addAll(cartItemListForTemp);
+            //cartItemListForUser.addAll(finalCartItemList);
+            //合并后，删除临时购物车
+            redisTemplate.delete(cartRedisOps.getKey());
+            cart.setItems(finalCartItemList);
         }
 
         return cart;
@@ -93,6 +117,9 @@ public class CartServiceImpl implements CartService {
                 CartItemVo cartItemVo = JSONObject.parseObject(json, CartItemVo.class);
                 return cartItemVo;
             }).collect(Collectors.toList());
+        }
+        if(cartItemList==null){
+            return new ArrayList<>();
         }
         return cartItemList;
     }
@@ -166,6 +193,7 @@ public class CartServiceImpl implements CartService {
         //把商品信息保存在redis中
         String json = JSONObject.toJSONString(cartItemVo);
         cartRedisOps.put(skuId.toString(),json);
+
         //redisTemplate.opsForHash().put("cart:id-1","1",json);
         return cartItemVo;
     }
