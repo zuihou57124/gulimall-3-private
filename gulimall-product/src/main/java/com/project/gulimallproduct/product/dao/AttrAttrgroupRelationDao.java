@@ -19,4 +19,5 @@ import java.util.List;
 public interface AttrAttrgroupRelationDao extends BaseMapper<AttrAttrgroupRelationEntity> {
 
     void deleteRelation(@Param("attrGroupRelation") List<AttrGroupRelationVo> attrGroupRelationVos);
+
 }
