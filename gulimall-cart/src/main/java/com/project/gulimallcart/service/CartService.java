@@ -18,4 +18,8 @@ public interface CartService {
     void clearCart(String cartKey);
 
     void checkCartItem(Long skuId, Boolean checked);
+
+    void changeItemCount(Long skuId, String action);
+
+    void delItem(Long skuId);
 }

@@ -108,16 +108,16 @@
 									</li>
 									<li>
 										<p>
-											<span>-</span>
+											<span th:attr="skuId=${cartInfo.skuId}" class="sub">-</span>
 											<span th:text="${cartInfo.getCount()}">5</span>
-											<span>+</span>
+											<span th:attr="skuId=${cartInfo.skuId}" class="add">+</span>
 										</p>
 									</li>
 									<li style="font-weight:bold">
 										<p class="zj" th:text="'￥'+${cartInfo.getTotal()}">￥22995.00</p>
 									</li>
 									<li>
-										<p>删除</p>
+										<p class="del" th:attr="skuId=${cartInfo.skuId}">删除</p>
 									</li>
 								</ol>
 							</div>
@@ -813,9 +813,24 @@
 			location.href = "http://cart.gulimall.com/checkCartItem?skuId="+skuId+"&checked="+checked;
 		})
 
+		$(".sub").click(function () {
+			let skuId = $(this).attr('skuId');
+			location.href = "http://cart.gulimall.com/changeItemCount?skuId="+skuId+"&action="+"sub";
+		})
+
+		$(".add").click(function () {
+			let skuId = $(this).attr('skuId');
+			location.href = "http://cart.gulimall.com/changeItemCount?skuId="+skuId+"&action="+"add";
+		})
+
+		$(".del").click(function () {
+			let skuId = $(this).attr('skuId');
+			location.href = "http://cart.gulimall.com/delItem?skuId="+skuId;
+		})
+
 		$(".allCheck").click(function () {
 			$(this)
-			location.href = "http://cart.gulimall.com/checkAllCartItem?checked"=1;
+			//location.href = "http://cart.gulimall.com/checkAllCartItem?checked"=1;
 		})
 
 	</script>

@@ -46,7 +46,6 @@ public class CartServiceImpl implements CartService {
      */
     @Override
     public Cart getAllCartItem(UserInfoTo userInfoTo) throws ExecutionException, InterruptedException {
-
         //如果已登录，要合并游客购物车
         BoundHashOperations<String, Object, Object> cartRedisOpsForTemp = redisTemplate.boundHashOps(CartConst.CART_PREFIX+userInfoTo.getUserKey());
         BoundHashOperations<String, Object, Object> cartRedisOpsForUser = redisTemplate.boundHashOps(CartConst.CART_PREFIX+userInfoTo.getUserId());
@@ -116,6 +115,29 @@ public class CartServiceImpl implements CartService {
 
             cartRedisOps.put(skuId.toString(),JSONObject.toJSONString(cartItem));
         }
+
+    }
+
+    @Override
+    public void changeItemCount(Long skuId, String action) {
+        CartItemVo cartItem = getCartItem(skuId);
+        if(cartItem.getCount()>0){
+            if("sub".equals(action)){
+                cartItem.setCount(cartItem.getCount()-1);
+            }
+        }
+        BoundHashOperations<String, Object, Object> cartRedisOps = getCartRedisOps();
+        if("add".equals(action)){
+            cartItem.setCount(cartItem.getCount()+1);
+        }
+        cartRedisOps.put(skuId.toString(),JSONObject.toJSONString(cartItem));
+    }
+
+    @Override
+    public void delItem(Long skuId) {
+
+        BoundHashOperations<String, Object, Object> cartRedisOps = getCartRedisOps();
+        cartRedisOps.delete(skuId.toString());
 
     }
 

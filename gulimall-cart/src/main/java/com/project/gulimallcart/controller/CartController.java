@@ -64,6 +64,34 @@ public class CartController {
     }
 
     /**
+     * @param skuId
+     * @param action
+     * @return
+     * 改变商品数量
+     */
+    @RequestMapping("/changeItemCount")
+    public String changeItemCount(@RequestParam("skuId") Long skuId,
+                                  @RequestParam("action") String action){
+
+        cartService.changeItemCount(skuId,action);
+
+        return "redirect:http://cart.gulimall.com/cart.html";
+    }
+
+    /**
+     * @param skuId
+     * @return
+     * 删除购物车选项
+     */
+    @RequestMapping("/delItem")
+    public String delItem(@RequestParam("skuId") Long skuId){
+
+        cartService.delItem(skuId);
+
+        return "redirect:http://cart.gulimall.com/cart.html";
+    }
+
+    /**
      * 全选购物项
      */
     @RequestMapping("/checkAllCartItem")
