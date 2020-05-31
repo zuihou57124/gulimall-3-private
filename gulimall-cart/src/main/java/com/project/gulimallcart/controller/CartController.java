@@ -66,7 +66,7 @@ public class CartController {
     /**
      * 全选购物项
      */
-    @RequestMapping("/checkCartItem")
+    @RequestMapping("/checkAllCartItem")
     public String checkAllCartItem(@RequestParam("checked") Boolean checked){
         cartService.checkCartItem(null,checked);
 
