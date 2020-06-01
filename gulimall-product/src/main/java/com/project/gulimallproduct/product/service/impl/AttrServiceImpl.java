@@ -62,7 +62,7 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
         BeanUtils.copyProperties(attrVo,attrEntity);
         this.save(attrEntity);
         //保存属性与属性分组之间的联系(销售属性不用保存)
-        if (attrVo.getSearchType()==1){
+        if (attrVo.getAttrType().equals(1)){
             if(attrVo.getAttrGroupId()!=null){
                 AttrAttrgroupRelationEntity attrGroupRelationEntity = new AttrAttrgroupRelationEntity();
                 attrGroupRelationEntity.setAttrGroupId(attrVo.getAttrGroupId());
@@ -185,7 +185,7 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
         this.updateById(attrEntity);
 
         //更新属性与属性分组之间的联系(销售属性不用更新)
-        if(attrVo.getSearchType()==1){
+        if(attrVo.getAttrType().equals(1)){
             AttrAttrgroupRelationEntity attrGroupRelationEntity = new AttrAttrgroupRelationEntity();
             attrGroupRelationEntity.setAttrId(attrEntity.getAttrId());
             attrGroupRelationEntity.setAttrGroupId(attrVo.getAttrGroupId());
