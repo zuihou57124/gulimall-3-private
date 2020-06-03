@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.thymeleaf.org">
 
 	<head>
 		<meta charset="utf-8" />
@@ -75,7 +75,10 @@
 
 				</ul>
 				<ul class="header-right">
-					<li>尚硅谷<img src="/static/order/confirm/img/03.png" style="margin-bottom: 0px;margin-left3: 3px;" /><img src="/static/order/confirm/img/06.png" /></li>
+					<li>
+						<a href="http://auth.gulimall.com/login.html" th:if="${session.user!=null}">欢迎 : [[${session.user.nickname}]]</a>
+						<a href="http://auth.gulimall.com/login.html" th:if="${session.user==null}">请登录</a>
+					</li>
 					<li>|</li>
 					<li class="spacer"></li>
 					<li><a href="/static/order/confirm/">我的订单</a></li>

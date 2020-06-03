@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.thymeleaf.org">
 
 	<head>
 		<meta charset="UTF-8">
@@ -131,8 +131,9 @@
 						</li>
 					</ul>
 					<ul class="header_ul_right">
-						<li style="border: 0;">
-							<a href="/static/order/detail/denglu.html" class="aa">你好，请登录</a>
+						<li>
+							<a href="http://auth.gulimall.com/login.html" th:if="${session.user!=null}">欢迎 : [[${session.user.nickname}]]</a>
+							<a href="http://auth.gulimall.com/login.html" th:if="${session.user==null}">请登录</a>
 						</li>
 						<li>
 							<a href="/static/order/detail/javascript:;" style="color: red;">免费注册</a> |</li>

@@ -42,7 +42,8 @@ spring:
       simple:
         acknowledge-mode: manual
 
-
+  thymeleaf:
+    cache: false
 #      initial-size: 10
 #      max-active: 100
 #      min-idle: 10
