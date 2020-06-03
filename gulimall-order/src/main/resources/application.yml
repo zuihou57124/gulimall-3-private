@@ -4,7 +4,6 @@ server:
   port: 10000
 
 spring:
-
   #redis配置
   redis:
     host: 59.110.137.100
@@ -16,6 +15,7 @@ spring:
     nacos:
       discovery:
         server-addr: 59.110.137.100:8848 #配置Nacos地址
+
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
     druid:
@@ -23,8 +23,26 @@ spring:
       url: jdbc:mysql://59.110.137.100:3306/gulimall_oms?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
       username: root
       password: 123456
+
   jackson:
     date-format: yyyy-MM-dd #HH:mm:ss
+
+  #rabbitmq发送端确认
+  rabbitmq:
+    host: 59.110.137.100
+    port: 5672
+
+    publisher-returns: true
+    publisher-confirms: true
+    template:
+      mandatory: true
+  #消费端默认自动确认，收到消息后，发送端会删除消息
+  #需要手动ack
+    listener:
+      simple:
+        acknowledge-mode: manual
+
+
 #      initial-size: 10
 #      max-active: 100
 #      min-idle: 10
@@ -33,8 +51,6 @@ spring:
 #      max-pool-prepared-statement-per-connection-size: 20
 #      time-between-eviction-runs-millis: 60000
 #      min-evictable-idle-time-millis: 300000
-
-
 
 mybatis:
   mapper-locations: classpath:/mapper/**/*.xml
