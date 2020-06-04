@@ -12,4 +12,8 @@ public class IndexController {
         return page;
     }
 
+    @RequestMapping("/toTrade")
+    public String toTrade(){
+        return "confirm";
+    }
 }
