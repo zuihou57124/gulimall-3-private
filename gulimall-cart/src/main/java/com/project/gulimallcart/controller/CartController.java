@@ -1,6 +1,7 @@
 package com.project.gulimallcart.controller;
 
 import com.project.gulimallcart.constant.CartConst;
+import com.project.gulimallcart.feign.ProductFeignService;
 import com.project.gulimallcart.interceptor.CartInterceptor;
 import com.project.gulimallcart.service.CartService;
 import com.project.gulimallcart.vo.Cart;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpSession;
 import javax.xml.ws.Action;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -26,6 +28,9 @@ public class CartController {
 
     @Autowired
     CartService cartService;
+
+    @Autowired
+    ProductFeignService productFeignService;
 
     @RequestMapping("/cart.html")
     public String cartList(HttpSession session,Model model) throws ExecutionException, InterruptedException {
@@ -129,7 +134,15 @@ public class CartController {
             e.printStackTrace();
         }
         if(allCartItem!=null){
-            return allCartItem.getItems().stream().filter(CartItemVo::getChecked).collect(Collectors.toList());
+            return allCartItem.getItems().stream()
+                    .filter(CartItemVo::getChecked)
+                    .map((item)->{
+                        //更新最新价格
+                        BigDecimal price = productFeignService.getPrice(item.getSkuId());
+                        item.setPrice(price);
+                        return item;
+                    })
+                    .collect(Collectors.toList());
         }
         return null;
     }

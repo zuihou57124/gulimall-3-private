@@ -5,6 +5,8 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.math.BigDecimal;
+
 @FeignClient("gulimall-product-11000")
 public interface ProductFeignService {
 
@@ -13,5 +15,8 @@ public interface ProductFeignService {
 
     @RequestMapping("/product/skusaleattrvalue/saleAttrs/{skuId}")
     R list(@PathVariable("skuId") Long skuId);
+
+    @RequestMapping("/product/skuinfo/{skuId}/price")
+    BigDecimal getPrice(@PathVariable("skuId") Long skuId);
 
 }

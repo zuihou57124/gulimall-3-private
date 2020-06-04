@@ -1,5 +1,6 @@
 package com.project.gulimallproduct.product.controller;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -45,6 +46,16 @@ public class SkuInfoController {
         return R.ok().put("page", page);
     }
 
+
+    /**
+     * @param skuId
+     * @return 返回商品的最新价格 (feign interface)
+     *
+     */
+    @RequestMapping("/{skuId}/price")
+    public BigDecimal getPrice(@PathVariable("skuId") Long skuId){
+        return skuInfoService.getById(skuId).getPrice();
+    }
 
     /**
      * 提供远程查询sku信息的服务
