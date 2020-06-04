@@ -1,6 +1,6 @@
 package com.project.gulimallorder.order.service.impl;
 
-import com.project.gulimallorder.order.OrderInterceptor;
+import com.project.gulimallorder.order.interceptor.OrderInterceptor;
 import com.project.gulimallorder.order.feign.CartFeignService;
 import com.project.gulimallorder.order.feign.MemberFeignService;
 import com.project.gulimallorder.order.vo.MemberAddressVo;
@@ -53,6 +53,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
         //远程查询购物车被选中的选项
         List<OrderItemVo> currentUserCartItems = cartFeignService.getCurrentUserCartItems();
         orderConfirmVo.setOrderItemVoList(currentUserCartItems);
+        //查询用户积分信息
+        orderConfirmVo.setIntegration(memberRespVo.getIntegration());
 
         return orderConfirmVo;
     }

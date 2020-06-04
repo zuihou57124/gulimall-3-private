@@ -1,6 +1,6 @@
 package com.project.gulimallorder.order.config;
 
-import com.project.gulimallorder.order.OrderInterceptor;
+import com.project.gulimallorder.order.interceptor.OrderInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;

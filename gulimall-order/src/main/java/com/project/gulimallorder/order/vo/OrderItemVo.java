@@ -3,6 +3,7 @@ package com.project.gulimallorder.order.vo;
 
 import lombok.Data;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -10,7 +11,7 @@ import java.util.List;
  * @author root
  */
 @Data
-public class OrderItemVo {
+public class OrderItemVo implements Serializable {
 
     private Long skuId;
 
@@ -26,5 +27,6 @@ public class OrderItemVo {
 
     private List<String> skuAttr;
 
+    private BigDecimal price;
 
 }
