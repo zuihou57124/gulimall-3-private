@@ -12,12 +12,14 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpSession;
 import javax.xml.ws.Action;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 @Controller
 public class CartController {
@@ -108,6 +110,28 @@ public class CartController {
         return "success";
     }
 
+    /**
+     * @return 返回当前用户选中的购物车选项(feign interface)
+     */
+    @ResponseBody
+    @RequestMapping("/currentUserCartItems")
+    public List<CartItemVo> getCurrentUserCartItems(){
+        UserInfoTo userInfoTo = CartInterceptor.threadLocal.get();
+        Cart allCartItem = null;
+        //如果未登录,直接返回null
+        if(userInfoTo.getUserId()==null){
+            return null;
+        }
 
+        try {
+            allCartItem = cartService.getAllCartItem(userInfoTo);
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+        }
+        if(allCartItem!=null){
+            return allCartItem.getItems().stream().filter(CartItemVo::getChecked).collect(Collectors.toList());
+        }
+        return null;
+    }
 
 }
