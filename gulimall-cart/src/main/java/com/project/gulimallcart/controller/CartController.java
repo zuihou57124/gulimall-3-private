@@ -23,6 +23,7 @@ import javax.servlet.http.HttpSession;
 import javax.xml.ws.Action;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
@@ -147,16 +148,24 @@ public class CartController {
                     .filter(CartItemVo::getChecked)
                     .map((item)->{
                         //远程更新最新价格
-                        BigDecimal price = productFeignService.getPrice(item.getSkuId());
+                        CompletableFuture.runAsync(()->{
+                            BigDecimal price = productFeignService.getPrice(item.getSkuId());
+                            item.setPrice(price);
+                        });
+
                         //远程查询商品是否有货
-                        R r = wareFeignService.hasStock(item.getSkuId());
-                        Boolean stock = r.getData("data",new TypeReference<Boolean>(){});
-                        item.setHasStock(stock);
-                        //远程查询商品重量
-                        R r2 = productFeignService.spuWeight(item.getSpuId());
-                        BigDecimal weight = r2.getData("data", new TypeReference<BigDecimal>() {});
-                        item.setWeight(weight);
-                        item.setPrice(price);
+                        CompletableFuture.runAsync(()->{
+                            R r = wareFeignService.hasStock(item.getSkuId());
+                            Boolean stock = r.getData("data",new TypeReference<Boolean>(){});
+                            item.setHasStock(stock);
+                        });
+                        CompletableFuture.runAsync(()->{
+                            //远程查询商品重量
+                            R r2 = productFeignService.spuWeight(item.getSpuId());
+                            BigDecimal weight = r2.getData("data", new TypeReference<BigDecimal>() {});
+                            item.setWeight(weight);
+                        });
+
                         return item;
                     })
                     .collect(Collectors.toList());
