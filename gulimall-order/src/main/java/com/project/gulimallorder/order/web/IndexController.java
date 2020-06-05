@@ -6,6 +6,7 @@ import com.project.gulimallorder.order.vo.MemberAddressVo;
 import com.project.gulimallorder.order.vo.OrderConfirmVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -23,8 +24,9 @@ public class IndexController {
     }
 
     @RequestMapping("/toTrade")
-    public String toTrade(){
+    public String toTrade(Model model){
         OrderConfirmVo orderConfirmVo =  orderService.confirmOrder();
+        model.addAttribute("orderConfirm",orderConfirmVo);
         return "confirm";
     }
 

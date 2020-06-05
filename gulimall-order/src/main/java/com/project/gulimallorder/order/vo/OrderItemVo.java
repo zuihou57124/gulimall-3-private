@@ -29,4 +29,17 @@ public class OrderItemVo implements Serializable {
 
     private BigDecimal price;
 
+    private Boolean hasStock = true;
+
+    private BigDecimal weight;
+
+    public BigDecimal getPrice(){
+        return price;
+    }
+
+    public Integer getCount(){
+        return count;
+    }
+
+
 }

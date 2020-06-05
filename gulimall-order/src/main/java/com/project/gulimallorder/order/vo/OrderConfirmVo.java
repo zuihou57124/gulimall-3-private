@@ -26,6 +26,20 @@ public class OrderConfirmVo {
      */
     List<OrderItemVo> orderItemVoList;
 
+    /**
+     * 商品总数
+     */
+    Integer num;
+
+    public Integer getNum(){
+        int num = 0;
+        for (OrderItemVo orderItemVo : orderItemVoList) {
+            num = num + orderItemVo.getCount();
+        }
+        return num;
+    }
+
+
     /*发票记录*/
 
     /**
@@ -43,7 +57,7 @@ public class OrderConfirmVo {
      */
     private BigDecimal payPrice;
 
-    BigDecimal getTotal(){
+    public BigDecimal getTotal(){
         BigDecimal total = new BigDecimal(0);
         if(orderItemVoList!=null){
             for (OrderItemVo orderItemVo : orderItemVoList) {
@@ -55,7 +69,7 @@ public class OrderConfirmVo {
         return total;
     }
 
-    BigDecimal getPayPrice(){
+    public BigDecimal getPayPrice(){
         return payPrice;
     }
 
