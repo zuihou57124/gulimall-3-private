@@ -30,7 +30,7 @@ public class WareSkuController {
     private WareSkuService wareSkuService;
 
     /**
-     * 查询sku是否有库存
+     * 查询sku是否有库存(列表)
      */
     @PostMapping("/hasstock")
     //@RequiresPermissions("ware:waresku:list")
@@ -39,6 +39,17 @@ public class WareSkuController {
         R r = R.ok();
         //List<SkuHasStockTo> list = (List<SkuHasStockTo>) r.get("data");
         return r.setData(skuHasStockToList);
+    }
+
+    /**
+     * 查询sku是否有库存(单个)
+     */
+    @RequestMapping("/{skuId}/hasstock")
+    public R hasStock(@PathVariable("skuId") Long skuId){
+        Boolean hasStock = wareSkuService.getSkuHasStockById(skuId);
+        R r = R.ok();
+
+        return r.setData(hasStock);
     }
 
 

@@ -206,6 +206,7 @@ public class CartServiceImpl implements CartService {
                 cartItemVo.setImg(skuInfo.getSkuDefaultImg());
                 cartItemVo.setTitle(skuInfo.getSkuTitle());
                 cartItemVo.setPrice(skuInfo.getPrice());
+                cartItemVo.setSpuId(skuInfo.getSpuId());
 
             }else {
                 System.out.println("远程调用商品服务获商品信息失败");

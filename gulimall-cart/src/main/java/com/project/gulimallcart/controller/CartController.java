@@ -1,12 +1,15 @@
 package com.project.gulimallcart.controller;
 
+import com.alibaba.fastjson.TypeReference;
 import com.project.gulimallcart.constant.CartConst;
 import com.project.gulimallcart.feign.ProductFeignService;
+import com.project.gulimallcart.feign.WareFeignService;
 import com.project.gulimallcart.interceptor.CartInterceptor;
 import com.project.gulimallcart.service.CartService;
 import com.project.gulimallcart.vo.Cart;
 import com.project.gulimallcart.vo.CartItemVo;
 import com.project.gulimallcart.vo.UserInfoTo;
+import io.renren.common.utils.R;
 import io.swagger.models.auth.In;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -31,6 +34,9 @@ public class CartController {
 
     @Autowired
     ProductFeignService productFeignService;
+
+    @Autowired
+    WareFeignService wareFeignService;
 
     @RequestMapping("/cart.html")
     public String cartList(HttpSession session,Model model) throws ExecutionException, InterruptedException {
@@ -140,8 +146,16 @@ public class CartController {
             return allCartItem.getItems().stream()
                     .filter(CartItemVo::getChecked)
                     .map((item)->{
-                        //更新最新价格
+                        //远程更新最新价格
                         BigDecimal price = productFeignService.getPrice(item.getSkuId());
+                        //远程查询商品是否有货
+                        R r = wareFeignService.hasStock(item.getSkuId());
+                        Boolean stock = r.getData("data",new TypeReference<Boolean>(){});
+                        item.setHasStock(stock);
+                        //远程查询商品重量
+                        R r2 = productFeignService.spuWeight(item.getSpuId());
+                        BigDecimal weight = r2.getData("data", new TypeReference<BigDecimal>() {});
+                        item.setWeight(weight);
                         item.setPrice(price);
                         return item;
                     })

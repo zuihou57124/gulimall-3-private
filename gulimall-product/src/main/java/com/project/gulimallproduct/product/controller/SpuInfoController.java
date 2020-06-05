@@ -1,5 +1,6 @@
 package com.project.gulimallproduct.product.controller;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -51,6 +52,21 @@ public class SpuInfoController {
         return R.ok();
     }
 
+    /**
+     * @param spuId
+     * @return 返回 spu 的重量
+     */
+    @RequestMapping("/{spuId}/weight")
+    public R spuWeight(@PathVariable("spuId") Long spuId){
+
+        SpuInfoEntity spu = spuInfoService.getById(spuId);
+        BigDecimal weight = null;
+        if(spu!=null){
+            weight = spu.getWeight();
+        }
+
+        return R.ok().setData(weight);
+    }
 
     /**
      * 商品列表信息

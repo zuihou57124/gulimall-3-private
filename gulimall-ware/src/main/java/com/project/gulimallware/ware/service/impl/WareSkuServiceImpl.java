@@ -101,4 +101,12 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
         return skuhasStockVoList;
     }
 
+    @Override
+    public Boolean getSkuHasStockById(Long skuId) {
+
+        Long count = this.baseMapper.getStockBySkuId(skuId);
+
+        return count!=null && count>0;
+    }
+
 }

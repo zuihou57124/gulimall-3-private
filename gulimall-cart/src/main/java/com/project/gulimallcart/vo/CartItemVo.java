@@ -8,6 +8,8 @@ public class CartItemVo{
 
     private Long skuId;
 
+    private Long spuId;
+
     private String title;
 
     private String img;
@@ -20,6 +22,26 @@ public class CartItemVo{
 
     private List<String> skuAttr;
 
+    private Boolean hasStock = true;
+
+    private BigDecimal weight;
+
+    public Boolean getHasStock() {
+        return hasStock;
+    }
+
+    public void setHasStock(Boolean hasStock) {
+        this.hasStock = hasStock;
+    }
+
+    public BigDecimal getWeight() {
+        return weight;
+    }
+
+    public void setWeight(BigDecimal weight) {
+        this.weight = weight;
+    }
+
     public BigDecimal getPrice() {
         return price;
     }
@@ -29,9 +51,6 @@ public class CartItemVo{
     }
 
     private BigDecimal price;
-
-
-
 
     public Long getSkuId() {
         return skuId;
@@ -88,5 +107,13 @@ public class CartItemVo{
 
     public void setSkuAttr(List<String> skuAttr) {
         this.skuAttr = skuAttr;
+    }
+
+    public Long getSpuId() {
+        return spuId;
+    }
+
+    public void setSpuId(Long spuId) {
+        this.spuId = spuId;
     }
 }

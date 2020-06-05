@@ -19,4 +19,7 @@ public interface ProductFeignService {
     @RequestMapping("/product/skuinfo/{skuId}/price")
     BigDecimal getPrice(@PathVariable("skuId") Long skuId);
 
+    @RequestMapping("/product/spuinfo/{spuId}/weight")
+    R spuWeight(@PathVariable("spuId") Long spuId);
+
 }

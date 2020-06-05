@@ -15,6 +15,8 @@ public class OrderItemVo implements Serializable {
 
     private Long skuId;
 
+    private Long spuId;
+
     private String title;
 
     private String img;
