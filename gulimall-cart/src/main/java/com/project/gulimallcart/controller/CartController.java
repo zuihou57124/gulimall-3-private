@@ -10,7 +10,6 @@ import com.project.gulimallcart.vo.Cart;
 import com.project.gulimallcart.vo.CartItemVo;
 import com.project.gulimallcart.vo.UserInfoTo;
 import io.renren.common.utils.R;
-import io.swagger.models.auth.In;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,13 +17,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpSession;
-import javax.xml.ws.Action;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 @Controller
@@ -38,6 +37,9 @@ public class CartController {
 
     @Autowired
     WareFeignService wareFeignService;
+
+    @Autowired
+    ThreadPoolExecutor executor;
 
     @RequestMapping("/cart.html")
     public String cartList(HttpSession session,Model model) throws ExecutionException, InterruptedException {
@@ -144,31 +146,30 @@ public class CartController {
             e.printStackTrace();
         }
         if(allCartItem!=null){
-            return allCartItem.getItems().stream()
+            List<CartItemVo> collect = allCartItem.getItems().stream()
                     .filter(CartItemVo::getChecked)
-                    .map((item)->{
+                    .map((item) -> {
                         //远程更新最新价格
-                        CompletableFuture.runAsync(()->{
-                            BigDecimal price = productFeignService.getPrice(item.getSkuId());
-                            item.setPrice(price);
-                        });
+
+                        BigDecimal price = productFeignService.getPrice(item.getSkuId());
+                        item.setPrice(price);
 
                         //远程查询商品是否有货
-                        CompletableFuture.runAsync(()->{
-                            R r = wareFeignService.hasStock(item.getSkuId());
-                            Boolean stock = r.getData("data",new TypeReference<Boolean>(){});
-                            item.setHasStock(stock);
-                        });
-                        CompletableFuture.runAsync(()->{
-                            //远程查询商品重量
-                            R r2 = productFeignService.spuWeight(item.getSpuId());
-                            BigDecimal weight = r2.getData("data", new TypeReference<BigDecimal>() {});
-                            item.setWeight(weight);
-                        });
+                        R r = wareFeignService.hasStock(item.getSkuId());
+                        Boolean stock = r.getData("data",new TypeReference<Boolean>(){});
+                        item.setHasStock(stock);
+
+                        //远程查询商品重量
+                        R r2 = productFeignService.spuWeight(item.getSpuId());
+                        BigDecimal weight = r2.getData("data", new TypeReference<BigDecimal>() {});
+                        item.setWeight(weight);
 
                         return item;
                     })
                     .collect(Collectors.toList());
+
+            return collect;
+
         }
         return null;
     }

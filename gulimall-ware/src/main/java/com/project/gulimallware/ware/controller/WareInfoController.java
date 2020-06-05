@@ -1,5 +1,6 @@
 package com.project.gulimallware.ware.controller;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -30,6 +31,18 @@ import io.renren.common.utils.R;
 public class WareInfoController {
     @Autowired
     private WareInfoService wareInfoService;
+
+    /**
+     * @param addrId
+     * @return
+     * 根据地址返回不同的运费
+     */
+    @RequestMapping("/fare")
+    public R getFare(@RequestParam("addrId") Long addrId){
+        BigDecimal fare = wareInfoService.getFare(addrId);
+
+        return R.ok().setData(fare);
+    }
 
     /**
      * 列表

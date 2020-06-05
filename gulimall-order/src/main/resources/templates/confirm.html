@@ -3,7 +3,7 @@
 
 	<head>
 		<meta charset="utf-8" />
-		<script src="/static/order/confirm/static/order/confirm/js/jquery-3.1.1.min.js"></script>
+		<script src="/static/order/confirm/js/jquery-3.1.1.min.js"></script>
 		<link rel="stylesheet" type="text/css" href="/static/order/confirm/css/JD2.css" />
 
 		<title></title>
@@ -601,7 +601,7 @@
 
 			<!--地址-->
 			<div class="top-3 addr-item" th:each="addr:${orderConfirm.getMemberAddressVoList()}">
-				<p th:attr="def=${addr.defaultStatus}" th:text="${addr.getName()}"></p><span th:text="${addr.getProvince()+' '+addr.getCity()+' '+addr.getDetailAddress()+' '+addr.getPhone()}"></span>
+				<p th:attr="def=${addr.defaultStatus},addrId=${addr.getId()}" th:text="${addr.getName()}"></p><span th:text="${addr.getProvince()+' '+addr.getCity()+' '+addr.getDetailAddress()+' '+addr.getPhone()}"></span>
 			</div>
 			<p class="p2">更多地址︾</p>
 			<div class="hh1"/></div>
@@ -670,7 +670,7 @@
 						<span style="color: red;" th:text="'￥ '+${#numbers.formatDecimal(orderItem.price,4,2)}"> </span>
 						<span th:text="'x'+${orderItem.count}">  </span>
 						<span th:text="${orderItem.hasStock?'有货':'暂时无货'}"></span>
-						<span>0.095kg</span>
+						<span th:text="${orderItem.weight}+' kg'"></span>
 						<p class="tui-1"><img src="/static/order/confirm/img/i_07.png" />支持7天无理由退货</p>
 					</div>
 				</div>
@@ -718,7 +718,7 @@
 				</p>
 				<p class="qian_y">
 					<span>运费： </span>
-					<span class="rmb"> &nbsp ￥0.00</span>
+					<span class="rmb"> &nbsp ￥<b id="fareEle">0</b></span>
 				</p>
 				<p class="qian_y">
 					<span>服务费： </span>
@@ -732,7 +732,7 @@
 			</div>
 
 			<div class="yfze">
-				<p class="yfze_a"><span class="z">应付总额：</span><span class="hq" th:text="${'￥ '+orderConfirm.getTotal()}"></span></p>
+				<p class="yfze_a"><span class="z">应付总额：</span><span class="hq">￥<b id="payPrice">[[${orderConfirm.getTotal()}]]</b></span></p>
 				<p class="yfze_b">寄送至： 北京 朝阳区 三环到四环之间 朝阳北路复兴国际大厦23层麦田房产 IT-中心研发二部 收货人：赵存权 188****5052</p>
 			</div>
 			<button class="tijiao">提交订单</button>
@@ -970,6 +970,12 @@
                 })
 
 				highlight();
+                let attrId = $(".addr-item p[def='1']").attr("def");
+				$.get("http://gulimall.com/api/ware/wareinfo/fare?addrId="+attrId,function (data) {
+					$("#fareEle").text(data['data']);
+					let total = [[${orderConfirm.total}]] + data['data'];
+					$("#payPrice").text(total);
+				});
             })
 
 		function highlight() {
@@ -977,10 +983,16 @@
 			$(".addr-item p[def='1']").css({"border":"2px solid red"});
 		}
 
-		$(".addr-item").click(function () {
+		$(".addr-item p").click(function () {
 			$(".addr-item p").attr('def',0);
 			$(this).attr("def",1);
 			highlight();
+			let attrId = $(this).attr("addrId");
+			$.get("http://gulimall.com/api/ware/wareinfo/fare?addrId="+attrId,function (data) {
+				$("#fareEle").text(data['data']);
+				let total = [[${orderConfirm.total}]] + data['data'];
+				$("#payPrice").text(total);
+			});
 		})
 
 		</script>
