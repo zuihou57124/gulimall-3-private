@@ -2,6 +2,8 @@ package com.project.gulimallorder.order.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.project.gulimallorder.order.vo.OrderConfirmVo;
+import com.project.gulimallorder.order.vo.OrderSubmitVo;
+import com.project.gulimallorder.order.vo.SubmitOrderRespVo;
 import io.renren.common.utils.PageUtils;
 import com.project.gulimallorder.order.entity.OrderEntity;
 
@@ -19,5 +21,7 @@ public interface OrderService extends IService<OrderEntity> {
     PageUtils queryPage(Map<String, Object> params);
 
     OrderConfirmVo confirmOrder();
+
+    SubmitOrderRespVo submitOrder(OrderSubmitVo orderSubmitVo);
 }
 

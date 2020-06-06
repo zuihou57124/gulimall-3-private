@@ -5,6 +5,7 @@ import com.project.gulimallorder.order.service.OrderService;
 import com.project.gulimallorder.order.vo.MemberAddressVo;
 import com.project.gulimallorder.order.vo.OrderConfirmVo;
 import com.project.gulimallorder.order.vo.OrderSubmitVo;
+import com.project.gulimallorder.order.vo.SubmitOrderRespVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -37,12 +38,17 @@ public class IndexController {
     @PostMapping("/submitOrder")
     public String submitOrder(OrderSubmitVo orderSubmitVo){
 
-        //需要实现：下单，验证令牌，验证价格，锁库存
-        //成功后跳到支付页
+        SubmitOrderRespVo submitOrderRespVo = orderService.submitOrder(orderSubmitVo);
+
+        if (submitOrderRespVo.getCode()==0){
+            //成功后跳到支付页
+
+            return null;
+        }
         //失败后跳到确认页面，重新确认订单信息
         System.out.println(orderSubmitVo.toString());
 
-        return null;
+        return "redirect:http://order.gulimall.com/toTrade";
     }
 
 

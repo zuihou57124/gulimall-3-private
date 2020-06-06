@@ -4,14 +4,14 @@ import com.project.gulimallorder.order.constant.OrderConst;
 import com.project.gulimallorder.order.interceptor.OrderInterceptor;
 import com.project.gulimallorder.order.feign.CartFeignService;
 import com.project.gulimallorder.order.feign.MemberFeignService;
-import com.project.gulimallorder.order.vo.MemberAddressVo;
-import com.project.gulimallorder.order.vo.OrderConfirmVo;
-import com.project.gulimallorder.order.vo.OrderItemVo;
+import com.project.gulimallorder.order.vo.*;
 import io.renren.common.vo.MemberRespVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -98,6 +98,34 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
         }
 
         return orderConfirmVo;
+    }
+
+    @Override
+    public SubmitOrderRespVo submitOrder(OrderSubmitVo orderSubmitVo) {
+
+        SubmitOrderRespVo resp = new SubmitOrderRespVo();
+        //需要实现：下单，验证令牌，验证价格，锁库存
+        String script = "if redis.call('get',KEYS[1])==ARGV[1] then return redis.call('del',KEYS[1]) else return 0 end";
+        MemberRespVo memberRespVo = OrderInterceptor.threadLocal.get();
+        //redis存储的token
+        String redisToken = redisTemplate.opsForValue().get(OrderConst.USER_ORDER_TOKEN_PRIFIX + memberRespVo.getId());
+        //页面传过来的token
+        String orderToken = orderSubmitVo.getOrderToken();
+        //令牌的对比和删除必须是原子性的
+        Long result = redisTemplate.execute(new DefaultRedisScript<Long>(script, Long.class), Arrays.asList(OrderConst.USER_ORDER_TOKEN_PRIFIX + memberRespVo.getId()), orderToken);
+        if(result==1L){
+            //通过令牌验证
+
+            return resp;
+        }
+
+        resp.setCode(500);
+        /*if(orderToken!=null && orderToken.equals(redisToken)){
+            //令牌通过验证，首先删除服务端的令牌
+            redisTemplate.delete(OrderConst.USER_ORDER_TOKEN_PRIFIX + memberRespVo.getId());
+        }*/
+
+        return resp;
     }
 
 }
