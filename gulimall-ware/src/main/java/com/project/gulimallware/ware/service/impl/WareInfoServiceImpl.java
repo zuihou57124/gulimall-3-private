@@ -2,6 +2,7 @@ package com.project.gulimallware.ware.service.impl;
 
 import com.alibaba.fastjson.TypeReference;
 import com.project.gulimallware.ware.feign.MemberFeignService;
+import com.project.gulimallware.ware.vo.FareVo;
 import com.project.gulimallware.ware.vo.MemberAddressVo;
 import io.renren.common.utils.R;
 import org.apache.commons.lang.StringUtils;
@@ -51,14 +52,18 @@ public class WareInfoServiceImpl extends ServiceImpl<WareInfoDao, WareInfoEntity
     }
 
     @Override
-    public BigDecimal getFare(Long addrId) {
+    public FareVo getFare(Long addrId) {
 
         R r = memberFeignService.info(addrId);
         MemberAddressVo address = r.getData("memberReceiveAddress", new TypeReference<MemberAddressVo>() {});
+        FareVo fareVo = new FareVo();
         if(address!=null){
             String phone = address.getPhone();
             String substring = phone.substring(phone.length() - 2);
-            return new BigDecimal(substring);
+            fareVo.setFare(new BigDecimal(substring));
+            fareVo.setAddress(address);
+
+            return fareVo;
         }
         return null;
     }

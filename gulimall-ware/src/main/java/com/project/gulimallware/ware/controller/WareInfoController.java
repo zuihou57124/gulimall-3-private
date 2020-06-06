@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Map;
 
+import com.project.gulimallware.ware.vo.FareVo;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -39,7 +40,7 @@ public class WareInfoController {
      */
     @RequestMapping("/fare")
     public R getFare(@RequestParam("addrId") Long addrId){
-        BigDecimal fare = wareInfoService.getFare(addrId);
+        FareVo fare = wareInfoService.getFare(addrId);
 
         return R.ok().setData(fare);
     }

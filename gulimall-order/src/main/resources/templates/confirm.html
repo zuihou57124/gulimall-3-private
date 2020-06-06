@@ -733,9 +733,14 @@
 
 			<div class="yfze">
 				<p class="yfze_a"><span class="z">应付总额：</span><span class="hq">￥<b id="payPrice">[[${orderConfirm.getTotal()}]]</b></span></p>
-				<p class="yfze_b">寄送至： 北京 朝阳区 三环到四环之间 朝阳北路复兴国际大厦23层麦田房产 IT-中心研发二部 收货人：赵存权 188****5052</p>
+				<p class="yfze_b">寄送至：<span id="recAddress"></span> <span id="recever"></span> </p>
 			</div>
-			<button class="tijiao">提交订单</button>
+			<form action="http://order.gulimall.com/submitOrder" method="post">
+				<input name="payPrice" type="hidden" id="payPrice2">
+				<input name="addrId" type="hidden" id="addrId">
+				<input name="orderToken" id="order_token" type="hidden" th:value="${orderConfirm.getOrderToken()}">
+				<button type="submit" class="tijiao">提交订单</button>
+			</form>
 		</div>
 		</div>
 
@@ -972,9 +977,14 @@
 				highlight();
                 let attrId = $(".addr-item p[def='1']").attr("def");
 				$.get("http://gulimall.com/api/ware/wareinfo/fare?addrId="+attrId,function (data) {
-					$("#fareEle").text(data['data']);
-					let total = [[${orderConfirm.total}]] + data['data'];
+					$("#fareEle").text(data['data']['fare']);
+					let total = [[${orderConfirm.total}]] + data['data']['fare'];
 					$("#payPrice").text(total);
+					$("#recAddress").text(data['data']['address']["province"]+" "+data['data']['address']["city"]+" "+data['data']['address']['detailAddress']);
+					$("#recever").text(data['data']['address']['name']);
+
+					$("#payPrice2").val(total);
+					$("#addrId").val($(".addr-item p[def='1']").attr('addrid'));
 				});
             })
 
@@ -989,9 +999,16 @@
 			highlight();
 			let attrId = $(this).attr("addrId");
 			$.get("http://gulimall.com/api/ware/wareinfo/fare?addrId="+attrId,function (data) {
-				$("#fareEle").text(data['data']);
-				let total = [[${orderConfirm.total}]] + data['data'];
+				$("#fareEle").text(data['data']['fare']);
+				let total = [[${orderConfirm.total}]] + data['data']['fare'];
 				$("#payPrice").text(total);
+				$("#recAddress").text(data['data']['address']["province"]+" "+data['data']['address']["city"]+" "+data['data']['address']['detailAddress']);
+				$("#recever").text(data['data']['address']['name']);
+
+				$("#payPrice2").val(total);
+				$("#addrId").val($(".addr-item p[def='1']").attr('addrid'));
+
+
 			});
 		})
 

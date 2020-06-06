@@ -14,13 +14,20 @@ public class OrderInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 
-        MemberRespVo memberRespVo = (MemberRespVo) request.getSession().getAttribute(OrderConst.LOGIN_USER);
+        MemberRespVo memberRespVo = null;
+        try {
+            memberRespVo = (MemberRespVo) request.getSession().getAttribute(OrderConst.LOGIN_USER);
+        }catch (Exception e){
+            Thread.sleep(200);
+            memberRespVo = (MemberRespVo) request.getSession().getAttribute(OrderConst.LOGIN_USER);
+        }
         if(memberRespVo==null){
             request.getSession().setAttribute("msg","请先登录");
             response.sendRedirect("http://auth.gulimall.com/login.html");
             return false;
         }
         threadLocal.set(memberRespVo);
+
         return true;
     }
 }

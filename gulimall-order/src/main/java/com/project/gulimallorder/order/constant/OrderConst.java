@@ -9,4 +9,6 @@ public class OrderConst {
 
     public static String LOGIN_USER = "user";
 
+    public static String USER_ORDER_TOKEN_PRIFIX = "order:token:";
+
 }

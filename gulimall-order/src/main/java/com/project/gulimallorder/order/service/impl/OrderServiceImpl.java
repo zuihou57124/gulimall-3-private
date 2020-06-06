@@ -1,5 +1,6 @@
 package com.project.gulimallorder.order.service.impl;
 
+import com.project.gulimallorder.order.constant.OrderConst;
 import com.project.gulimallorder.order.interceptor.OrderInterceptor;
 import com.project.gulimallorder.order.feign.CartFeignService;
 import com.project.gulimallorder.order.feign.MemberFeignService;
@@ -8,13 +9,16 @@ import com.project.gulimallorder.order.vo.OrderConfirmVo;
 import com.project.gulimallorder.order.vo.OrderItemVo;
 import io.renren.common.vo.MemberRespVo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -40,6 +44,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
 
     @Autowired
     ThreadPoolExecutor executor;
+
+    @Autowired
+    StringRedisTemplate redisTemplate;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -78,6 +85,11 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
 
         //查询用户积分信息
         orderConfirmVo.setIntegration(memberRespVo.getIntegration());
+
+        //防重令牌
+        String uuid = UUID.randomUUID().toString().replace("-", "");
+        orderConfirmVo.setOrderToken(uuid);
+        redisTemplate.opsForValue().set(OrderConst.USER_ORDER_TOKEN_PRIFIX+memberRespVo.getId(),uuid,20, TimeUnit.MINUTES);
 
         try {
             CompletableFuture.allOf(addressTask,currentUserCartItemsTask).get();
