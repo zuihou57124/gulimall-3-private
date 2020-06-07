@@ -11,4 +11,5 @@ public class OrderConst {
 
     public static String USER_ORDER_TOKEN_PRIFIX = "order:token:";
 
+
 }
