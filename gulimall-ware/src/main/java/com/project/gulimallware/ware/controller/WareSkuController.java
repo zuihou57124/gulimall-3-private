@@ -4,7 +4,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import com.project.gulimallware.ware.exception.NoStockException;
+import com.project.gulimallware.ware.vo.LockStockResult;
 import com.project.gulimallware.ware.vo.SkuHasStockVo;
+import com.project.gulimallware.ware.vo.WareSkuLockVo;
 import io.renren.common.to.SkuHasStockTo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -28,6 +31,20 @@ import io.renren.common.utils.R;
 public class WareSkuController {
     @Autowired
     private WareSkuService wareSkuService;
+
+    @PostMapping("/lock/order")
+    public R lockStockForOrder(@RequestBody WareSkuLockVo wareSkuLockVo){
+
+        Boolean juge = null;
+        try {
+            juge = wareSkuService.lockStockForOrder(wareSkuLockVo);
+        } catch (NoStockException e) {
+
+            return R.error(5001,"商品库存不足");
+        }
+
+        return R.ok().setData(juge);
+    }
 
     /**
      * 查询sku是否有库存(列表)

@@ -10,6 +10,7 @@ import com.project.gulimallorder.order.feign.WareFeignService;
 import com.project.gulimallorder.order.interceptor.OrderInterceptor;
 import com.project.gulimallorder.order.feign.CartFeignService;
 import com.project.gulimallorder.order.feign.MemberFeignService;
+import com.project.gulimallorder.order.service.OrderItemService;
 import com.project.gulimallorder.order.to.CreateOrderTo;
 import com.project.gulimallorder.order.vo.*;
 import io.renren.common.to.SpuBoundTo;
@@ -39,6 +40,7 @@ import io.renren.common.utils.Query;
 import com.project.gulimallorder.order.dao.OrderDao;
 import com.project.gulimallorder.order.entity.OrderEntity;
 import com.project.gulimallorder.order.service.OrderService;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -66,6 +68,10 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
 
     @Autowired
     ProductFeignService productFeignService;
+
+    @Autowired
+    OrderItemService orderItemService;
+
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -120,6 +126,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
     }
 
     @Override
+    @Transactional(rollbackFor = {})
     public SubmitOrderRespVo submitOrder(OrderSubmitVo orderSubmitVo) {
 
         threadLocal.set(orderSubmitVo);
@@ -139,7 +146,29 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
             if(Math.abs(orderTo.getOrder().getPayAmount().subtract(orderSubmitVo.getPayPrice()).doubleValue())<0.01){
                 //验证价格成功,保存订单到数据库
                 saveOrder(orderTo);
+                //锁库存,如果锁定库存失败，对订单的数据库操作必须回滚,
+                // (因为此处会调用远程服务，所以已经涉及到了分布式事务)
 
+                WareSkuLockVo wareSkuLockVo = new WareSkuLockVo();
+                wareSkuLockVo.setOrderSn(orderTo.getOrder().getOrderSn());
+                List<OrderItemVo> orderItemVoList = orderTo.getOrderItemList().stream().map((itemEntity) -> {
+                    OrderItemVo orderItemVo = new OrderItemVo();
+                    orderItemVo.setSkuId(itemEntity.getSkuId());
+                    orderItemVo.setCount(itemEntity.getSkuQuantity());
+                    orderItemVo.setTitle(itemEntity.getSkuName());
+
+                    return orderItemVo;
+                }).collect(Collectors.toList());
+
+                wareSkuLockVo.setLocks(orderItemVoList);
+                R r = wareFeignService.lockStockForOrder(wareSkuLockVo);
+                if(r.getCode()==0){
+
+                }
+                else {
+                    //远程调用失败
+
+                }
             }
             resp.setCode(0);
             return resp;
@@ -162,7 +191,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
 
         OrderEntity order = orderTo.getOrder();
         List<OrderItemEntity> orderItemList = orderTo.getOrderItemList();
-
+        this.save(order);
+        orderItemService.saveBatch(orderItemList);
 
     }
 
@@ -233,7 +263,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
      */
     private OrderEntity buildOrder() {
         //根据时间生成订单号
-        String orderSn = IdWorker.getTimeId();
+        String orderSn = IdWorker.getTimeId().substring(0,8);
         OrderEntity order = new OrderEntity();
         order.setOrderSn(orderSn);
         MemberRespVo member = OrderInterceptor.threadLocal.get();
