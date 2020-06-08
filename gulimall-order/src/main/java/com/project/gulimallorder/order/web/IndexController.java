@@ -42,7 +42,11 @@ public class IndexController {
         //初始值为0，出现异常代表失败，不为0
         SubmitOrderRespVo submitOrderRespVo = new SubmitOrderRespVo();
         submitOrderRespVo.setCode(0);
-        submitOrderRespVo = orderService.submitOrder(orderSubmitVo);
+        try {
+            submitOrderRespVo = orderService.submitOrder(orderSubmitVo);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         if (submitOrderRespVo.getCode()==0){
             //成功后跳到支付页

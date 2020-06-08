@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.project.gulimallorder.order.constant.OrderConst;
 import com.project.gulimallorder.order.constant.OrderEnum;
 import com.project.gulimallorder.order.entity.OrderItemEntity;
+import com.project.gulimallorder.order.exception.NoStockException;
 import com.project.gulimallorder.order.feign.ProductFeignService;
 import com.project.gulimallorder.order.feign.WareFeignService;
 import com.project.gulimallorder.order.interceptor.OrderInterceptor;
@@ -184,6 +185,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
             //令牌通过验证，首先删除服务端的令牌
             redisTemplate.delete(OrderConst.USER_ORDER_TOKEN_PRIFIX + memberRespVo.getId());
         }*/
+        if(resp.getCode()!=0){
+            throw new NoStockException(0L);
+        }
 
         return resp;
     }
