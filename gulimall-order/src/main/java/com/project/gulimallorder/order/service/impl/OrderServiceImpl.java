@@ -126,7 +126,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
     }
 
     @Override
-    @Transactional(rollbackFor = {})
+    @Transactional
     public SubmitOrderRespVo submitOrder(OrderSubmitVo orderSubmitVo) {
 
         threadLocal.set(orderSubmitVo);
@@ -135,7 +135,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
         String script = "if redis.call('get',KEYS[1])==ARGV[1] then return redis.call('del',KEYS[1]) else return 0 end";
         MemberRespVo memberRespVo = OrderInterceptor.threadLocal.get();
         //redis存储的token
-        String redisToken = redisTemplate.opsForValue().get(OrderConst.USER_ORDER_TOKEN_PRIFIX + memberRespVo.getId());
+        //String redisToken = redisTemplate.opsForValue().get(OrderConst.USER_ORDER_TOKEN_PRIFIX + memberRespVo.getId());
         //页面传过来的token
         String orderToken = orderSubmitVo.getOrderToken();
         //令牌的对比和删除必须是原子性的
@@ -163,18 +163,23 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
                 wareSkuLockVo.setLocks(orderItemVoList);
                 R r = wareFeignService.lockStockForOrder(wareSkuLockVo);
                 if(r.getCode()==0){
+                    resp.setCode(0);
+                    resp.setOrder(orderTo.getOrder());
 
+                    return resp;
                 }
                 else {
-                    //远程调用失败
-
+                    resp.setCode(3);
                 }
             }
-            resp.setCode(0);
-            return resp;
+            else {
+                resp.setCode(2);
+            }
+        }
+        else {
+            resp.setCode(1);
         }
 
-        resp.setCode(500);
         /*if(orderToken!=null && orderToken.equals(redisToken)){
             //令牌通过验证，首先删除服务端的令牌
             redisTemplate.delete(OrderConst.USER_ORDER_TOKEN_PRIFIX + memberRespVo.getId());
@@ -255,6 +260,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
         order.setIntegration(giftIntegration);
         //订单是否删除
         order.setDeleteStatus(0);
+        //
 
     }
 
@@ -263,12 +269,13 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
      */
     private OrderEntity buildOrder() {
         //根据时间生成订单号
-        String orderSn = IdWorker.getTimeId().substring(0,8);
+        String orderSn = IdWorker.getTimeId();
         OrderEntity order = new OrderEntity();
         order.setOrderSn(orderSn);
         MemberRespVo member = OrderInterceptor.threadLocal.get();
         order.setMemberId(member.getId());
         order.setMemberUsername(member.getUsername());
+        order.setCreateTime(new Date());
         order.setModifyTime(new Date());
         //远程获取运费和地址信息
         R r = wareFeignService.getFare(threadLocal.get().getAddrId());

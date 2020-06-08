@@ -591,7 +591,9 @@
 			<!--</div>-->
 		<!--</div>-->
 		<!--主体部分-->
-		<p class="p1">填写并核对订单信息</p>
+		<p class="p1" >填写并核对订单信息
+			<span th:if="${error!=null}" th:text="${error}" style="color: red"></span>
+		</p>
 		<div class="section">
 			<!--收货人信息-->
 			<div class="top-2">
