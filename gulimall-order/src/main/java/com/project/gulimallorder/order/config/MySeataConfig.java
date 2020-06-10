@@ -38,17 +38,14 @@ public class MySeataConfig {
         return new DruidDataSource();
     }*/
 
-    /*@Autowired
-    DataSourceProperties properties;
+/*    @Autowired
+    DataSourceProperties properties;*/
 
-    @Bean
-    public DataSource dataSource(DataSourceProperties properties){
-        DruidDataSource dataSource = properties.initializeDataSourceBuilder().type(DruidDataSource.class).build();
-        if(StringUtils.hasText(properties.getName())){
-            dataSource.setName(properties.getName());
-        }
+/*    @Bean("dataSource")
+    @Primary
+    public DataSource dataSource(DruidDataSource druidDataSource){
 
-        return new DataSourceProxy(dataSource);
+        return new DataSourceProxy(druidDataSource);
     }*/
 
 }

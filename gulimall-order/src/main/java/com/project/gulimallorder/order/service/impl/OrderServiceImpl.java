@@ -168,6 +168,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
                 if(r.getCode()==0){
                     resp.setCode(0);
                     resp.setOrder(orderTo.getOrder());
+                    //int i = 1/0;
 
                     return resp;
                 }
@@ -187,9 +188,10 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
             //令牌通过验证，首先删除服务端的令牌
             redisTemplate.delete(OrderConst.USER_ORDER_TOKEN_PRIFIX + memberRespVo.getId());
         }*/
-        if(resp.getCode()!=0){
+        /*if(resp.getCode()!=0){
             throw new NoStockException(0L);
-        }
+        }*/
+
 
         return resp;
     }

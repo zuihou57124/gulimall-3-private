@@ -42,7 +42,7 @@ public class IndexController {
 
         //初始值为0，出现异常代表失败，不为0
         SubmitOrderRespVo submitOrderRespVo = new SubmitOrderRespVo();
-        submitOrderRespVo.setCode(0);
+        //submitOrderRespVo.setCode(0);
         try {
             submitOrderRespVo = orderService.submitOrder(orderSubmitVo);
         } catch (NoStockException e) {
