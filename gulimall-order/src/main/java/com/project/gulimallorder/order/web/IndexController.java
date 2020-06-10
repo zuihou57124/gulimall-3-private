@@ -1,6 +1,7 @@
 package com.project.gulimallorder.order.web;
 
 
+import com.project.gulimallorder.order.exception.NoStockException;
 import com.project.gulimallorder.order.service.OrderService;
 import com.project.gulimallorder.order.vo.OrderConfirmVo;
 import com.project.gulimallorder.order.vo.OrderSubmitVo;
@@ -44,7 +45,7 @@ public class IndexController {
         submitOrderRespVo.setCode(0);
         try {
             submitOrderRespVo = orderService.submitOrder(orderSubmitVo);
-        } catch (Exception e) {
+        } catch (NoStockException e) {
             e.printStackTrace();
         }
 
