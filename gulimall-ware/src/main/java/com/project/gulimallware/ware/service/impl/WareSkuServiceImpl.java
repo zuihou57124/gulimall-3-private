@@ -1,7 +1,11 @@
 package com.project.gulimallware.ware.service.impl;
 
+import com.project.gulimallware.ware.entity.WareOrderTaskDetailEntity;
+import com.project.gulimallware.ware.entity.WareOrderTaskEntity;
 import com.project.gulimallware.ware.exception.NoStockException;
 import com.project.gulimallware.ware.feign.SkuInfoFeignService;
+import com.project.gulimallware.ware.service.WareOrderTaskDetailService;
+import com.project.gulimallware.ware.service.WareOrderTaskService;
 import com.project.gulimallware.ware.vo.LockStockResult;
 import com.project.gulimallware.ware.vo.OrderItemVo;
 import com.project.gulimallware.ware.vo.SkuHasStockVo;
@@ -10,6 +14,7 @@ import io.renren.common.to.SkuHasStockTo;
 import io.renren.common.to.SkuTo;
 import lombok.Data;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -34,6 +39,15 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
 
     @Autowired
     SkuInfoFeignService skuInfoFeignService;
+
+    @Autowired
+    WareOrderTaskDetailService wareOrderTaskDetailService;
+
+    @Autowired
+    WareOrderTaskService wareOrderTaskService;
+
+    @Autowired
+    RabbitTemplate rabbitTemplate;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -119,10 +133,20 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
      * @param wareSkuLockVo
      * @return
      * 为订单锁库存
+     *
+     * 什么情况下库存需要解锁
+     * 1）、用户手动取消订单或者 超过订单有效时间
+     * 2）、下单时，库存锁成功，但是其他业务比如订单业务出现异常，导致订单回滚，库存也要随之回滚
+     *
      */
     @Transactional
     @Override
     public Boolean lockStockForOrder(WareSkuLockVo wareSkuLockVo) {
+
+        //为每个要锁库存的订单生成记录，记录锁的信息
+        WareOrderTaskEntity wareOrderTask = new WareOrderTaskEntity();
+        wareOrderTask.setOrderSn(wareSkuLockVo.getOrderSn());
+        wareOrderTaskService.save(wareOrderTask);
 
         List<OrderItemVo> locks = wareSkuLockVo.getLocks();
         //首先查询哪些仓库有此sku
@@ -145,6 +169,14 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
                 for (Long wareId : wareIds) {
                     Long count = this.baseMapper.lockStock(skuId, wareId, skuWareStock.getNum().longValue());
                     if(count==1L){
+                        //为订单项追踪锁信息
+                        WareOrderTaskDetailEntity wareOrderTaskDetail = new WareOrderTaskDetailEntity(null, skuId, null
+                                , skuWareStock.getNum(), wareOrderTask.getId(), wareId, 1);
+                        wareOrderTaskDetailService.save(wareOrderTaskDetail);
+
+                        //发送消息到队列
+                        rabbitTemplate.convertAndSend("stock-event-exchange","stock.lock",wareOrderTaskDetail);
+
                         skuStock = true;
                         break;
                     }

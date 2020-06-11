@@ -1,21 +1,21 @@
 package com.project.gulimallorder.order.web;
 
 
+import com.project.gulimallorder.order.entity.OrderEntity;
 import com.project.gulimallorder.order.exception.NoStockException;
 import com.project.gulimallorder.order.service.OrderService;
 import com.project.gulimallorder.order.vo.OrderConfirmVo;
 import com.project.gulimallorder.order.vo.OrderSubmitVo;
 import com.project.gulimallorder.order.vo.SubmitOrderRespVo;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.UUID;
 
 @Controller
 public class IndexController {
@@ -23,10 +23,25 @@ public class IndexController {
     @Autowired
     OrderService orderService;
 
+    @Autowired
+    RabbitTemplate rabbitTemplate;
+
     @RequestMapping("/{page}.html")
     public String getPage(@PathVariable("page") String page){
         return page;
     }
+
+
+/*    @RequestMapping("/create")
+    @ResponseBody
+    public String create(){
+        OrderEntity orderEntity = new OrderEntity();
+        orderEntity.setOrderSn(UUID.randomUUID().toString());
+        rabbitTemplate.convertAndSend("order-event-exchange","order.create.queue",orderEntity);
+
+
+        return orderEntity.getOrderSn();
+    }*/
 
     @RequestMapping("/toTrade")
     public String toTrade(Model model, HttpServletRequest request){

@@ -15,10 +15,26 @@ seata:
       server-addr: 59.110.137.100:8848
       namespace:
 
+
 server:
   port: 12000
 
 spring:
+
+  #rabbitmq发送端确认
+  rabbitmq:
+    host: 59.110.137.100
+    port: 5672
+
+    publisher-returns: true
+    publisher-confirms: true
+    template:
+      mandatory: true
+    #消费端默认自动确认，收到消息后，发送端会删除消息
+    #需要手动ack
+    listener:
+      simple:
+        acknowledge-mode: manual
 
   #redis配置
   redis:

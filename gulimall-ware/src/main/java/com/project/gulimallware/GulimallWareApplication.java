@@ -1,6 +1,7 @@
 package com.project.gulimallware;
 
 import org.mybatis.spring.annotation.MapperScan;
+import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
@@ -16,6 +17,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableFeignClients("com.project.gulimallware.ware.feign")
 @EnableTransactionManagement
 @MapperScan("com.project.gulimallware.ware.dao")
+@EnableRabbit
 public class GulimallWareApplication {
 
     public static void main(String[] args) {
