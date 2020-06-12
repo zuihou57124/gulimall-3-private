@@ -24,6 +24,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -156,7 +157,11 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
         StockLockDeatilTo detail = stockLockTo.getDetail();
         WareOrderTaskDetailEntity detailFromDb = wareOrderTaskDetailService.getById(detail.getId());
         if(detailFromDb==null){
-
+            try {
+                channel.basicAck(message.getMessageProperties().getDeliveryTag(),false);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }else {
 
             //解锁的不同情况：
@@ -174,6 +179,11 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
                 if(orderVo==null || orderVo.getStatus()==4){
                         //用户取消订单或者订单不存在-解锁
                         unLock(detail);
+                    try {
+                        channel.basicAck(message.getMessageProperties().getDeliveryTag(),false);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
 
             }
