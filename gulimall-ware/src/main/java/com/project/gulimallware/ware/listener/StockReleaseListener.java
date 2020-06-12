@@ -43,7 +43,7 @@ public class StockReleaseListener {
     /**
      * 订单主动关闭，库存解锁
      */
-    @RabbitHandler
+    //@RabbitHandler
     public void orderCloseHdanler(OrderVo orderVo, Message message, Channel channel) throws IOException {
         System.out.println("订单关闭，解锁库存...");
         try {

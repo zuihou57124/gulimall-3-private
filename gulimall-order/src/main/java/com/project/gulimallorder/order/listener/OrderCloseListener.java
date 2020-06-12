@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 
 @Service
-@RabbitListener(queues = "stock.release.stock.queue")
+@RabbitListener(queues = "order.release.order.queue")
 public class OrderCloseListener {
 
     @Autowired
@@ -29,7 +29,7 @@ public class OrderCloseListener {
     public void releaseStockHdanler(OrderEntity orderEntity, Message message, Channel channel) throws IOException {
         System.out.println("收到关闭订单的消息...");
         try {
-            orderService.close(orderEntity);
+            orderService.closeOrder(orderEntity);
             channel.basicAck(message.getMessageProperties().getDeliveryTag(),false);
             System.out.println("关闭成功");
         } catch (Exception e) {

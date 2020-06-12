@@ -223,6 +223,7 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
         StockLockDeatilTo detail = stockLockTo.getDetail();
         WareOrderTaskDetailEntity detailFromDb = wareOrderTaskDetailService.getById(detail.getId());
         if(detailFromDb==null){
+            //没有对应的库存工作单，代表库存系统本地出现异常，会自动回滚，无需操作
             //channel.basicAck(message.getMessageProperties().getDeliveryTag(),false);
         }else {
 
@@ -254,6 +255,11 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
             }
 
         }
+    }
+
+    @Override
+    public void unLock(OrderVo orderVo) {
+
     }
 
 

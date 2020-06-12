@@ -173,9 +173,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
                 if(r.getCode()==0){
                     resp.setCode(0);
                     resp.setOrder(orderTo.getOrder());
-                    //int i = 1/0;
+                    int i = 1/0;
                     //订单创建成功，发送消息给队列
-                    rabbitTemplate.convertAndSend("order.event.exchange","order.create.queue",orderTo.getOrder());
+                    //rabbitTemplate.convertAndSend("order-event-exchange","order.create.queue",orderTo.getOrder());
 
                     return resp;
                 }
@@ -203,8 +203,12 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
         return resp;
     }
 
+    /**
+     * @param orderEntity
+     * 主动关闭订单，立即发送消息给库存系统队列，告知解锁库存
+     */
     @Override
-    public void close(OrderEntity orderEntity) {
+    public void closeOrder(OrderEntity orderEntity) {
         //关闭订单前 ，先查询出订单的最新状态，只有状态为“新建”时才能关闭
         Integer status = orderEntity.getStatus();
         if(status.equals(OrderEnum.CREATE_NEW.getCode())){
@@ -215,7 +219,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
             updateById(updateOrder);
             OrderVo orderVo = new OrderVo();
             BeanUtils.copyProperties(orderEntity,orderVo);
-            rabbitTemplate.convertAndSend("order.event.exchange",
+            rabbitTemplate.convertAndSend("order-event-exchange",
                     "order.release.other",orderVo);
 
         }

@@ -19,11 +19,11 @@ public class MyRabbitmqConfig {
     //首次创建队列时，要监听任意一个队列，spring才会自动创建
 
 
-    @RabbitListener(queues = "order.release.order.queue")
+    /*@RabbitListener(queues = "order.release.order.queue")
     public void orderListener(OrderEntity orderEntity, Channel channel, Message message) throws IOException {
         System.out.println("订单即将过期："+orderEntity.getOrderSn());
         channel.basicAck(message.getMessageProperties().getDeliveryTag(),false);
-    }
+    }*/
 
     @Bean
     public Queue orderDelayQueue(){
