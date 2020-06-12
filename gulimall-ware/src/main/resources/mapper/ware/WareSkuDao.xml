@@ -31,7 +31,7 @@
     </update>
     <update id="uoLock">
 
-        update wms_ware_sku set stock_lock=stock_lock-#{num}
+        update wms_ware_sku set stock_locked=stock_locked-#{num}
                 where sku_id=#{skuId} and ware_id=#{wareId}
 
     </update>

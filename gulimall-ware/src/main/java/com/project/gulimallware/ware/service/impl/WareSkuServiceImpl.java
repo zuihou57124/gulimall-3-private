@@ -199,13 +199,17 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
 
     }*/
 
-
     /**
      * 解锁库存
      */
     public void unLock(StockLockDeatilTo detail){
         Integer integer = this.baseMapper.uoLock(detail.getSkuId(), detail.getSkuNum(), detail.getWareId());
-        
+        //如果解锁成功，对应的工作单也应该更新状态为“解锁”
+        if(integer.equals(1)){
+            WareOrderTaskDetailEntity wareOrderTaskDetail = new WareOrderTaskDetailEntity();
+            wareOrderTaskDetail.setId(detail.getId());
+            wareOrderTaskDetail.setLockStatus(2);
+        }
     }
 
     @Override
@@ -242,6 +246,7 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
             else {
                 //远程获取订单状态失败，拒绝消息后重新入列，继续监听解锁
                 //channel.basicReject(message.getMessageProperties().getDeliveryTag(),true);
+                throw new RuntimeException("远程查询订单详情失败");
             }
 
         }
