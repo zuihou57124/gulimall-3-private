@@ -19,7 +19,9 @@ import io.renren.common.utils.R;
 import io.renren.common.vo.MemberRespVo;
 import javafx.scene.layout.BorderImage;
 import org.omg.CORBA.ORB;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.health.OrderedHealthAggregator;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
@@ -72,6 +74,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
 
     @Autowired
     OrderItemService orderItemService;
+
+    @Autowired
+    RabbitTemplate rabbitTemplate;
 
 
     @Override
@@ -167,7 +172,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
                 if(r.getCode()==0){
                     resp.setCode(0);
                     resp.setOrder(orderTo.getOrder());
-                    int i = 1/0;
+                    //int i = 1/0;
+                    //订单创建成功，发送消息给队列
+                    rabbitTemplate.convertAndSend("order.event.exchange","order.create.order",orderTo.getOrder());
 
                     return resp;
                 }
@@ -193,6 +200,19 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
 
 
         return resp;
+    }
+
+    @Override
+    public void close(OrderEntity orderEntity) {
+        //关闭订单前 ，先查询出订单的最新状态，只有状态为“新建”时才能关闭
+        Integer status = orderEntity.getStatus();
+        if(status.equals(OrderEnum.CREATE_NEW.getCode())){
+            //关闭订单
+            OrderEntity updateOrder = new OrderEntity();
+            updateOrder.setId(orderEntity.getId());
+            updateOrder.setStatus(OrderEnum.CANELED.getCode());
+            updateById(updateOrder);
+        }
     }
 
     /**

@@ -209,6 +209,7 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
             WareOrderTaskDetailEntity wareOrderTaskDetail = new WareOrderTaskDetailEntity();
             wareOrderTaskDetail.setId(detail.getId());
             wareOrderTaskDetail.setLockStatus(2);
+            wareOrderTaskDetailService.updateById(wareOrderTaskDetail);
         }
     }
 
@@ -239,7 +240,10 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
                 OrderVo orderVo = r.getData("data", new TypeReference<OrderVo>(){});
                 if(orderVo==null || orderVo.getStatus()==4){
                     //用户取消订单或者订单不存在-解锁
-                    unLock(detail);
+                    // 工作单状态为 “已锁定” 时才能解锁
+                    if(detail.getLockStatus().equals(1)){
+                        unLock(detail);
+                    }
                     //channel.basicAck(message.getMessageProperties().getDeliveryTag(),false);
                 }
             }
