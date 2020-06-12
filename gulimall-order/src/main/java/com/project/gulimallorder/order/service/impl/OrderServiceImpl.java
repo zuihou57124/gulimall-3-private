@@ -129,7 +129,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
 
     @Override
     @Transactional
-    @GlobalTransactional
+    //@GlobalTransactional
     public SubmitOrderRespVo submitOrder(OrderSubmitVo orderSubmitVo) {
 
         threadLocal.set(orderSubmitVo);
@@ -168,7 +168,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
                 if(r.getCode()==0){
                     resp.setCode(0);
                     resp.setOrder(orderTo.getOrder());
-                    //int i = 1/0;
+                    int i = 1/0;
 
                     return resp;
                 }

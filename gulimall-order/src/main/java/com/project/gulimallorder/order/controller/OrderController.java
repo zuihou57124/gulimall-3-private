@@ -3,6 +3,7 @@ package com.project.gulimallorder.order.controller;
 import java.util.Arrays;
 import java.util.Map;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,6 +31,14 @@ import io.renren.common.utils.R;
 public class OrderController {
     @Autowired
     private OrderService orderService;
+
+
+    @RequestMapping("/status/{orderSn}")
+    public R getOrderStatus(@PathVariable("orderSn") String orderSn){
+        OrderEntity order = orderService.getOne(new QueryWrapper<OrderEntity>().eq("order_sn", orderSn));
+
+        return R.ok().setData(order);
+    }
 
     /**
      * 列表
