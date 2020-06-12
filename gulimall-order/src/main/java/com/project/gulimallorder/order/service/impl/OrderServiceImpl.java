@@ -20,6 +20,7 @@ import io.renren.common.vo.MemberRespVo;
 import javafx.scene.layout.BorderImage;
 import org.omg.CORBA.ORB;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.health.OrderedHealthAggregator;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -174,7 +175,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
                     resp.setOrder(orderTo.getOrder());
                     //int i = 1/0;
                     //订单创建成功，发送消息给队列
-                    rabbitTemplate.convertAndSend("order.event.exchange","order.create.order",orderTo.getOrder());
+                    rabbitTemplate.convertAndSend("order.event.exchange","order.create.queue",orderTo.getOrder());
 
                     return resp;
                 }
@@ -212,6 +213,11 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
             updateOrder.setId(orderEntity.getId());
             updateOrder.setStatus(OrderEnum.CANELED.getCode());
             updateById(updateOrder);
+            OrderVo orderVo = new OrderVo();
+            BeanUtils.copyProperties(orderEntity,orderVo);
+            rabbitTemplate.convertAndSend("order.event.exchange",
+                    "order.release.other",orderVo);
+
         }
     }
 
