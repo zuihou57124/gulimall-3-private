@@ -1,6 +1,7 @@
 package com.project.gulimallware.ware.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.project.gulimallware.ware.to.mq.StockLockTo;
 import com.project.gulimallware.ware.vo.LockStockResult;
 import com.project.gulimallware.ware.vo.SkuHasStockVo;
 import com.project.gulimallware.ware.vo.WareSkuLockVo;
@@ -29,5 +30,7 @@ public interface WareSkuService extends IService<WareSkuEntity> {
     Boolean getSkuHasStockById(Long skuId);
 
     Boolean lockStockForOrder(WareSkuLockVo wareSkuLockVo);
+
+    void unLock(StockLockTo stockLockTo);
 }
 

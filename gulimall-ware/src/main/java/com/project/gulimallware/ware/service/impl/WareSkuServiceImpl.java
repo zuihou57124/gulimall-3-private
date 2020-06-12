@@ -147,7 +147,7 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
      *
      * 监听队列，判断是否需要解锁库存
      */
-    @RabbitListener(queues = "stock.release.stock.queue")
+    /*@RabbitListener(queues = "stock.release.stock.queue")
     public void releaseStockHdanler(StockLockTo stockLockTo, Message message, Channel channel){
         //解锁逻辑：
         // 1）、其他业务比如订单业务发生异常，需要解锁，这是需要处理的逻辑
@@ -185,12 +185,19 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
                         e.printStackTrace();
                     }
                 }
-
+            }
+            else {
+                //远程获取订单状态失败，拒绝消息后重新入列，继续监听解锁
+                try {
+                    channel.basicReject(message.getMessageProperties().getDeliveryTag(),true);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
 
         }
 
-    }
+    }*/
 
 
     /**
@@ -199,6 +206,45 @@ public class WareSkuServiceImpl extends ServiceImpl<WareSkuDao, WareSkuEntity> i
     public void unLock(StockLockDeatilTo detail){
         Integer integer = this.baseMapper.uoLock(detail.getSkuId(), detail.getSkuNum(), detail.getWareId());
         
+    }
+
+    @Override
+    public void unLock(StockLockTo stockLockTo){
+        //解锁逻辑：
+        // 1）、其他业务比如订单业务发生异常，需要解锁，这是需要处理的逻辑
+        // 2）、锁库存本身出现异常，系统会自动回滚 ，无需处理
+        // 可以通过获得库存工作单的id有无来判断解锁
+
+        StockLockDeatilTo detail = stockLockTo.getDetail();
+        WareOrderTaskDetailEntity detailFromDb = wareOrderTaskDetailService.getById(detail.getId());
+        if(detailFromDb==null){
+            //channel.basicAck(message.getMessageProperties().getDeliveryTag(),false);
+        }else {
+
+            //解锁的不同情况：
+            // 1）没有对应的订单：解锁
+            // 2）有对应的订单：
+            //              订单状态：已取消-解锁
+            //                       没有取消-不解锁
+
+            Long id = stockLockTo.getId();
+            WareOrderTaskEntity taskOrder = wareOrderTaskService.getById(id);
+            //远程获取订单的状态
+            R r = orderFeignService.getOrderStatus(taskOrder.getOrderSn());
+            if(r.getCode()==0){
+                OrderVo orderVo = r.getData("data", new TypeReference<OrderVo>(){});
+                if(orderVo==null || orderVo.getStatus()==4){
+                    //用户取消订单或者订单不存在-解锁
+                    unLock(detail);
+                    //channel.basicAck(message.getMessageProperties().getDeliveryTag(),false);
+                }
+            }
+            else {
+                //远程获取订单状态失败，拒绝消息后重新入列，继续监听解锁
+                //channel.basicReject(message.getMessageProperties().getDeliveryTag(),true);
+            }
+
+        }
     }
 
 

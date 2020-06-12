@@ -17,7 +17,6 @@ import com.project.gulimallorder.order.vo.*;
 import io.renren.common.to.SpuBoundTo;
 import io.renren.common.utils.R;
 import io.renren.common.vo.MemberRespVo;
-import io.seata.spring.annotation.GlobalTransactional;
 import javafx.scene.layout.BorderImage;
 import org.omg.CORBA.ORB;
 import org.springframework.beans.factory.annotation.Autowired;

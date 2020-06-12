@@ -13,10 +13,10 @@ import java.util.HashMap;
 @Configuration
 public class MyRabbitmqConfig {
 
-    @RabbitListener(queues = "stock.release.stock.queue")
+/*    @RabbitListener(queues = "stock.release.stock.queue")
     public void orderListener(){
         System.out.println("监听中...");
-    }
+    }*/
 
     @Bean
     public Queue stockDelayQueue(){

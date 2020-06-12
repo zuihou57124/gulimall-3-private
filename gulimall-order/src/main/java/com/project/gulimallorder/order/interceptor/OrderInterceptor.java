@@ -3,6 +3,7 @@ package com.project.gulimallorder.order.interceptor;
 import com.alibaba.fastjson.JSONObject;
 import com.project.gulimallorder.order.constant.OrderConst;
 import io.renren.common.vo.MemberRespVo;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.servlet.HandlerInterceptor;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -13,6 +14,11 @@ public class OrderInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+
+        boolean match = new AntPathMatcher().match("/order/order/status/**",request.getRequestURI());
+        if(match){
+            return true;
+        }
 
         MemberRespVo memberRespVo = null;
         try {
