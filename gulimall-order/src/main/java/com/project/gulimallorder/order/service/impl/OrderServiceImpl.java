@@ -173,9 +173,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
                 if(r.getCode()==0){
                     resp.setCode(0);
                     resp.setOrder(orderTo.getOrder());
-                    int i = 1/0;
+                    //int i = 1/0;
                     //订单创建成功，发送消息给队列
-                    //rabbitTemplate.convertAndSend("order-event-exchange","order.create.queue",orderTo.getOrder());
+                    rabbitTemplate.convertAndSend("order-event-exchange","order.create.queue",orderTo.getOrder());
 
                     return resp;
                 }
