@@ -1,5 +1,6 @@
 package com.project.gulimallorder.order.service.impl;
 
+import cn.hutool.db.sql.Order;
 import com.alibaba.fastjson.TypeReference;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.project.gulimallorder.order.constant.OrderConst;
@@ -132,6 +133,17 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
         return orderConfirmVo;
     }
 
+    /**
+     * @param orderSubmitVo
+     * @return
+     * 发送消息可能会出现的问题：
+     * 1）、消息丢失(重点解决)
+     *      1、将消息存储在数据库中，定期扫描数据库，防止消息丢失
+     * 2）、消息重复
+     *      1、实现接口幂等性
+     *      2、防重表
+     * 3）、消息积压
+     * */
     @Override
     @Transactional
     //@GlobalTransactional
@@ -223,6 +235,26 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
                     "order.release.other",orderVo);
 
         }
+    }
+
+    /**
+     * @param orderSn
+     * @return payVo
+     * 获取订单的支付信息
+     */
+    @Override
+    public PayVo getOrderPayInfo(String orderSn) {
+
+        OrderEntity order = getOne(new QueryWrapper<OrderEntity>().eq("order_sn", orderSn));
+        PayVo payVo = new PayVo();
+        payVo.setOut_trade_no(order.getOrderSn());
+        payVo.setTotal_amount(order.getTotalAmount().setScale(2,BigDecimal.ROUND_UP).toString());
+        List<OrderItemEntity> orderItems = orderItemService.list(new QueryWrapper<OrderItemEntity>().eq("order_sn", orderSn));
+        List<String> collect = orderItems.stream().map(OrderItemEntity::getSkuName).collect(Collectors.toList());
+        payVo.setSubject(collect.toString());
+        payVo.setBody("啦啦啦，哇哇哇");
+
+        return payVo;
     }
 
     /**

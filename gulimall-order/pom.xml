@@ -42,6 +42,11 @@
             </exclusions>
         </dependency>
 
+        <dependency>
+            <groupId>com.alipay.sdk</groupId>
+            <artifactId>alipay-sdk-java</artifactId>
+            <version>4.9.79.ALL</version>
+        </dependency>
 
 <!--        <dependency>
             <groupId>com.alibaba.cloud</groupId>
