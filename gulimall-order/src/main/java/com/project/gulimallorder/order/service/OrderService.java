@@ -1,10 +1,7 @@
 package com.project.gulimallorder.order.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.project.gulimallorder.order.vo.OrderConfirmVo;
-import com.project.gulimallorder.order.vo.OrderSubmitVo;
-import com.project.gulimallorder.order.vo.PayVo;
-import com.project.gulimallorder.order.vo.SubmitOrderRespVo;
+import com.project.gulimallorder.order.vo.*;
 import io.renren.common.utils.PageUtils;
 import com.project.gulimallorder.order.entity.OrderEntity;
 
@@ -28,5 +25,7 @@ public interface OrderService extends IService<OrderEntity> {
     void closeOrder(OrderEntity orderEntity);
 
     PayVo getOrderPayInfo(String orderSn);
+
+    String handleAliPayResult(PayAsyncVo payAsyncVo);
 }
 

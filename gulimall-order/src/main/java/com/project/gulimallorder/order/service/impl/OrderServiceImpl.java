@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.project.gulimallorder.order.constant.OrderConst;
 import com.project.gulimallorder.order.constant.OrderEnum;
 import com.project.gulimallorder.order.entity.OrderItemEntity;
+import com.project.gulimallorder.order.entity.PaymentInfoEntity;
 import com.project.gulimallorder.order.exception.NoStockException;
 import com.project.gulimallorder.order.feign.ProductFeignService;
 import com.project.gulimallorder.order.feign.WareFeignService;
@@ -13,8 +14,10 @@ import com.project.gulimallorder.order.interceptor.OrderInterceptor;
 import com.project.gulimallorder.order.feign.CartFeignService;
 import com.project.gulimallorder.order.feign.MemberFeignService;
 import com.project.gulimallorder.order.service.OrderItemService;
+import com.project.gulimallorder.order.service.PaymentInfoService;
 import com.project.gulimallorder.order.to.CreateOrderTo;
 import com.project.gulimallorder.order.vo.*;
+import com.sun.org.apache.regexp.internal.RE;
 import io.renren.common.to.SpuBoundTo;
 import io.renren.common.utils.R;
 import io.renren.common.vo.MemberRespVo;
@@ -79,6 +82,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
 
     @Autowired
     RabbitTemplate rabbitTemplate;
+
+    @Autowired
+    PaymentInfoService paymentInfoService;
 
 
     @Override
@@ -235,6 +241,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
     @Override
     public void closeOrder(OrderEntity orderEntity) {
         //关闭订单前 ，先查询出订单的最新状态，只有状态为“新建”时才能关闭
+        orderEntity = getOne(new QueryWrapper<OrderEntity>()
+                .eq("order_sn",orderEntity.getOrderSn()));
         Integer status = orderEntity.getStatus();
         if(status.equals(OrderEnum.CREATE_NEW.getCode())){
             //关闭订单
@@ -247,7 +255,10 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
             rabbitTemplate.convertAndSend("order-event-exchange",
                     "order.release.other",orderVo);
 
+        }else {
+            System.out.println("订单不是新建状态，不能取消");
         }
+
     }
 
     /**
@@ -268,6 +279,40 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
         payVo.setBody("啦啦啦，哇哇哇");
 
         return payVo;
+    }
+
+    /**
+     * @param payAsyncVo
+     * @return
+     * 处理支付结果
+     */
+    @Override
+    public String handleAliPayResult(PayAsyncVo payAsyncVo) {
+
+        //保存交易流水
+        PaymentInfoEntity paymentInfo = new PaymentInfoEntity();
+        paymentInfo.setAlipayTradeNo(payAsyncVo.getTrade_no());
+        paymentInfo.setOrderSn(payAsyncVo.getOut_trade_no());
+        payAsyncVo.setTrade_status(payAsyncVo.getTrade_status());
+        paymentInfo.setSubject(payAsyncVo.getSubject());
+        paymentInfo.setCallbackTime(payAsyncVo.getNotify_time());
+        paymentInfo.setTotalAmount(new BigDecimal(payAsyncVo.getTotal_amount()));
+        //paymentInfoService.save(paymentInfo);
+        //修改订单状态
+        if(payAsyncVo.getTrade_status().equals("TRADE_SUCCESS") || payAsyncVo.getTrade_status().equals("TRADE_FINISHED")){
+            String orderSn = payAsyncVo.getOut_trade_no();
+            OrderEntity orderEntity = getOne(new QueryWrapper<OrderEntity>().eq("order_sn",orderSn));
+            if(orderEntity.getStatus().equals(OrderEnum.CANELED.getCode())){
+                return "failed";
+            }
+            orderEntity.setStatus(OrderEnum.PAYED.getCode());
+            boolean b = updateById(orderEntity);
+            if(b){
+                return "success";
+            }
+        }
+
+        return "failed";
     }
 
     /**

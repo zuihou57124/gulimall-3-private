@@ -60,6 +60,8 @@ spring:
 
   thymeleaf:
     cache: false
+  mvc:
+    date-format: yyyy-MM-dd HH:mm:ss
 #      initial-size: 10
 #      max-active: 100
 #      min-idle: 10

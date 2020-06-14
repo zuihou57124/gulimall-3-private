@@ -30,7 +30,7 @@ public class MyRabbitmqConfig {
         HashMap<String, Object> arg = new HashMap<>();
         arg.put("x-dead-letter-exchange","order-event-exchange");
         arg.put("x-dead-letter-routing-key","order.release.queue");
-        arg.put("x-message-ttl",60000);
+        arg.put("x-message-ttl",60000*5);
 
         return new Queue("order.delay.queue",true,false,false,arg);
     }
