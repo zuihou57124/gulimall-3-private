@@ -83,10 +83,23 @@ public class OrderServiceImpl extends ServiceImpl<OrderDao, OrderEntity> impleme
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
+
+        MemberRespVo memberRespVo = OrderInterceptor.threadLocal.get();
+
         IPage<OrderEntity> page = this.page(
                 new Query<OrderEntity>().getPage(params),
                 new QueryWrapper<OrderEntity>()
+                        .eq("member_id",memberRespVo.getId()).orderByDesc("create_time")
         );
+
+        List<OrderEntity> collect = page.getRecords().stream().map((item) -> {
+            List<OrderItemEntity> orderItems = orderItemService.list(new QueryWrapper<OrderItemEntity>()
+                    .eq("order_sn", item.getOrderSn()));
+            item.setItemList(orderItems);
+            return item;
+        }).collect(Collectors.toList());
+
+        page.setRecords(collect);
 
         return new PageUtils(page);
     }
