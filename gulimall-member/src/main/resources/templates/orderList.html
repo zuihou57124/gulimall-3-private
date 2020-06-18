@@ -265,6 +265,7 @@
             </td>
             <td th:if="${itemStatus.index==0}" th:rowspan="${itemStatus.size}">
               <button>确认收货</button>
+              <button th:onclick="toPay([[${order.orderSn}]])" th:if="${order.status==0}">去付款</button>
               <p style="margin:4px 0; ">取消订单</p>
               <p>催单</p>
             </td>
@@ -678,5 +679,15 @@
 </body>
 <script src="/static/member/js/jquery-3.1.1.min.js"></script>
 <script src="/static/member/js/index.js"></script>
+
+<script>
+
+  function toPay(orderSn) {
+    url = "http://order.gulimall.com/payOrder/?orderSn="+orderSn;
+    location.href = url;
+  }
+
+</script>
+
 
 </html>
